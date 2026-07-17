@@ -11,7 +11,1806 @@
     --ink-soft:#3D4A6B;
     --gold:#C0902F;
     --gold-deep:#8F6A1F;
+    --paper:#FAF6EE;<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUK Bazaar — Shivaji University Consumer Stores</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --ink:#1B2A4A;
+    --ink-soft:#3D4A6B;
+    --gold:#C0902F;
+    --gold-deep:#8F6A1F;
     --paper:#FAF6EE;
+    --paper-raised:#FFFFFF;
+    --line:#E5DDC8;
+    --red:#C1442A;
+    --orange:#E8802E;
+    --orange-deep:#C86A1F;
+    --green:#3E7A4C;
+    --radius:10px;
+    --shadow: 0 2px 10px rgba(27,42,74,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .brandbar{
+    background:var(--ink);
+    color:var(--paper);
+    padding:10px 24px;
+    font-size:13px;
+    display:flex;
+    justify-content:space-between;
+    letter-spacing:.03em;
+  }
+  header.top{
+    background:var(--paper-raised);
+    border-bottom:3px solid var(--gold);
+    padding:16px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:20;
+    box-shadow:var(--shadow);
+  }
+  .logo{
+    display:flex; align-items:center; gap:12px;
+  }
+  .logo .mark{
+    width:42px; height:42px; border-radius:8px;
+    background:linear-gradient(135deg,var(--ink),var(--ink-soft));
+    color:var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:Georgia, serif; font-weight:bold; font-size:20px;
+  }
+  .logo h1{
+    font-size:20px; margin:0; font-family:Georgia, serif; letter-spacing:.02em;
+  }
+  .logo p{margin:0; font-size:11px; color:var(--ink-soft); letter-spacing:.08em; text-transform:uppercase;}
+  .cart-btn{
+    position:relative; border:1.5px solid var(--ink); background:var(--paper-raised);
+    padding:9px 16px; border-radius:999px; cursor:pointer; font-weight:600; font-size:14px;
+  }
+  .cart-btn .badge{
+    position:absolute; top:-8px; right:-8px; background:var(--orange); color:#fff;
+    font-size:11px; padding:2px 6px; border-radius:999px; font-weight:700;
+  }
+  /* layout wrapper replaces the old <main> rule — see .layout below */
+
+  .promo{
+    background:linear-gradient(120deg, var(--ink) 0%, #2C3F6B 60%, var(--ink) 100%);
+    color:var(--paper); border-radius:var(--radius); padding:26px 28px; margin-bottom:22px;
+    display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;
+  }
+  .promo h2{ font-family:Georgia, serif; font-size:26px; margin:0 0 6px; }
+  .promo p{ margin:0; color:#D9DEEA; max-width:520px; font-size:14px; line-height:1.5;}
+  .promo .savings{ text-align:center; }
+  .promo .savings .num{ font-size:34px; font-weight:800; color:var(--gold); font-family:Georgia,serif; }
+  .promo .savings .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#C7CEE0; }
+
+  .filters{ display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
+  .filters input[type=text]{
+    flex:1; min-width:200px; padding:11px 14px; border-radius:999px; border:1.5px solid var(--line);
+    background:var(--paper-raised); font-size:14px;
+  }
+  .cat-pill{
+    border:1.5px solid var(--line); background:var(--paper-raised); padding:9px 16px;
+    border-radius:999px; cursor:pointer; font-size:13px; font-weight:600; color:var(--ink-soft);
+  }
+  .cat-pill.active{ background:var(--orange); border-color:var(--orange-deep); color:#fff; }
+
+  /* Sub-category browsing: 4-column icon-tile grid, like Blinkit's category picker */
+  .subcat-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px 8px; margin-bottom:22px;
+  }
+  @media (min-width:700px){ .subcat-grid{ grid-template-columns:repeat(6,1fr); } }
+  .subcat-tile{
+    display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; text-align:center;
+    background:none; border:none; padding:0; font-family:inherit;
+  }
+  .subcat-tile .icon{
+    width:100%; aspect-ratio:1/1; max-width:64px; border-radius:16px; display:flex; align-items:center;
+    justify-content:center; font-size:26px; box-shadow:var(--shadow);
+  }
+  .subcat-tile.active .icon{ box-shadow:0 0 0 3px var(--orange); }
+  .subcat-tile .lbl{ font-size:11px; font-weight:700; color:var(--ink-soft); line-height:1.25; }
+  .subcat-tile.active .lbl{ color:var(--orange-deep); }
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px;
+  }
+  @media (max-width:520px){
+    .grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+  }
+  .card{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:12px;
+    overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow); position:relative;
+  }
+  .card .photo{
+    aspect-ratio:1/1; position:relative; background:#F1EBDB; display:flex; align-items:center; justify-content:center;
+  }
+  .card .photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card .photo .badge-emoji{ font-size:46px; }
+  .card .ribbon{
+    position:absolute; top:0; left:10px; background:#2563A8; color:#fff; font-size:10.5px; font-weight:800;
+    line-height:1.15; text-align:center; padding:4px 7px 6px; border-radius:0 0 5px 5px; z-index:2;
+  }
+  .card .body{ padding:10px 12px 12px; display:flex; flex-direction:column; gap:2px; flex:1; }
+  .card .code{ font-size:10.5px; color:#B0A997; letter-spacing:.03em; }
+  .card .name{ font-size:13.5px; font-weight:700; line-height:1.28; min-height:34px; }
+  .card .name-mr{ font-size:12px; color:var(--ink-soft); margin-top:-2px; }
+  .card .size{ font-size:11.5px; color:var(--ink-soft); margin-bottom:6px; }
+  .card .price-add-row{ display:flex; align-items:flex-end; justify-content:space-between; margin-top:auto; gap:6px; }
+  .card .prices{ display:flex; flex-direction:column; line-height:1.2; }
+  .card .final{ font-size:15px; font-weight:800; color:var(--ink); }
+  .card .mrp{ font-size:11px; color:#9AA1B0; text-decoration:line-through; }
+  .card .add-btn{
+    border:1.5px solid var(--green); background:#fff; color:var(--green); font-weight:800; font-size:12.5px;
+    border-radius:8px; padding:7px 14px; cursor:pointer; white-space:nowrap;
+  }
+  .card .add-btn:disabled{ border-color:#C9C2AF; color:#B0A997; cursor:default; }
+  .card .stepper{
+    display:flex; align-items:center; gap:8px; background:var(--green); border-radius:8px; padding:5px 8px;
+  }
+  .card .stepper button{ background:none; border:none; color:#fff; font-weight:800; font-size:14px; cursor:pointer; width:16px; }
+  .card .stepper span{ color:#fff; font-weight:800; font-size:12.5px; }
+  .rate-pending{ font-size:11.5px; color:#B08A4A; font-weight:600; font-style:italic; }
+
+
+  .empty{ text-align:center; padding:60px 20px; color:var(--ink-soft); }
+
+  /* Shop / My Orders nav */
+  .shop-nav{
+    display:flex; gap:6px; max-width:1180px; margin:0 auto; padding:10px 24px 0;
+  }
+  .shop-tab{
+    border:none; background:transparent; padding:10px 6px; font-size:14.5px; font-weight:700;
+    color:var(--ink-soft); cursor:pointer; border-bottom:3px solid transparent;
+  }
+  .shop-tab.active{ color:var(--orange-deep); border-bottom-color:var(--orange); }
+
+  /* Single-column layout — cart lives in the sticky bar + full-screen cart page */
+  .layout{ max-width:1180px; margin:0 auto; padding:20px 24px 90px; }
+
+  .qty{ display:flex; align-items:center; gap:6px; }
+  .form-field{ margin-bottom:10px; }
+  .form-field label{ font-size:11.5px; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:4px; letter-spacing:.03em;}
+  .form-field input, .form-field textarea{
+    width:100%; padding:9px 11px; border-radius:7px; border:1.5px solid var(--line); font-size:13.5px; font-family:inherit;
+  }
+  .cart-empty{ text-align:center; color:var(--ink-soft); font-size:13.5px; padding:30px 10px; }
+
+  /* Sticky "View Cart" bar */
+  .viewcart-bar{
+    position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--green); color:#fff;
+    max-width:1180px; margin:0 auto; border-radius:12px 12px 0 0; padding:12px 20px;
+    display:none; align-items:center; justify-content:space-between; box-shadow:0 -4px 16px rgba(0,0,0,.15);
+    cursor:pointer;
+  }
+  .viewcart-bar.show{ display:flex; }
+  .vc-left{ display:flex; align-items:center; gap:12px; }
+  .vc-icon{ font-size:20px; }
+  .vc-count{ font-weight:700; font-size:14px; }
+  .vc-total{ font-size:13px; opacity:.9; }
+  .vc-btn{ background:none; border:none; color:#fff; font-weight:800; font-size:15px; cursor:pointer; }
+
+  /* Full-screen Cart Page */
+  .cartpage-overlay{ position:fixed; inset:0; background:rgba(27,42,74,.35); z-index:70; display:none; }
+  .cartpage-overlay.show{ display:block; }
+  .cartpage{
+    position:fixed; inset:0; background:var(--paper); z-index:71; display:none; flex-direction:column;
+    max-width:640px; margin:0 auto; box-shadow:0 0 30px rgba(0,0,0,.2);
+  }
+  .cartpage.show{ display:flex; }
+  .cartpage-header{
+    background:var(--paper-raised); padding:16px 18px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--line); flex-shrink:0;
+  }
+  .cartpage-header h2{ margin:0; font-size:18px; font-family:Georgia,serif; }
+  .cartpage-header .back-btn{ border:none; background:none; font-size:20px; cursor:pointer; color:var(--ink); }
+  .cartpage-body{ flex:1; overflow-y:auto; padding:16px 18px 20px; }
+  .delivery-card{
+    background:var(--paper-raised); border-radius:10px; padding:14px 16px; display:flex; align-items:center;
+    gap:12px; margin-bottom:16px; box-shadow:var(--shadow);
+  }
+  .delivery-card .d-icon{ font-size:22px; }
+  .delivery-card .d-title{ font-weight:700; font-size:14.5px; }
+  .delivery-card .d-sub{ font-size:12.5px; color:var(--ink-soft); }
+  .cartpage-items{ background:var(--paper-raised); border-radius:10px; padding:4px 16px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .cp-line{ display:flex; gap:12px; padding:14px 0; border-bottom:1px solid var(--line); align-items:center; }
+  .cp-line:last-child{ border-bottom:none; }
+  .cp-thumb{
+    width:56px; height:56px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:26px; overflow:hidden;
+  }
+  .cp-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .cp-info{ flex:1; }
+  .cp-info .n{ font-size:13.5px; font-weight:700; }
+  .cp-info .sz{ font-size:11.5px; color:var(--ink-soft); }
+  .cp-info .p{ font-size:13px; font-weight:700; margin-top:2px; }
+  .cp-info .p .strike{ font-size:11.5px; color:#9AA1B0; text-decoration:line-through; font-weight:400; margin-left:5px; }
+  .cp-line .stepper button{
+    width:24px; height:24px; border-radius:50%; border:none; background:var(--green); color:#fff; cursor:pointer; font-weight:800;
+  }
+  .bill-card{ background:var(--paper-raised); border-radius:10px; padding:16px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .bill-card .bill-title{ font-weight:700; font-size:14.5px; margin-bottom:10px; }
+  .bill-row{ display:flex; justify-content:space-between; font-size:13.5px; padding:6px 0; color:var(--ink-soft); }
+  .bill-row.big{ font-weight:800; color:var(--ink); border-top:1px dashed var(--line); margin-top:4px; padding-top:10px; font-size:15px; }
+  .saved-badge{ background:#E4F1E6; color:var(--green); font-size:11px; font-weight:700; padding:2px 7px; border-radius:5px; margin-right:6px; }
+  .cancel-policy{ font-size:12px; color:var(--ink-soft); line-height:1.5; padding:0 2px 10px; }
+  .cartpage-footer{
+    flex-shrink:0; background:var(--green); color:#fff; padding:14px 18px; display:flex; align-items:center;
+    justify-content:space-between;
+  }
+  .cf-amt{ font-size:17px; font-weight:800; }
+  .cf-lbl{ font-size:10.5px; opacity:.85; letter-spacing:.05em; }
+  .cf-place-btn{ background:#fff; color:var(--green); border:none; padding:12px 22px; border-radius:9px; font-weight:800; font-size:14.5px; cursor:pointer; }
+
+  /* Confirm Order modal */
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(27,42,74,.4); z-index:60; display:none; }
+  .modal-overlay.show{ display:block; }
+  .confirm-modal{
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:420px; max-width:90vw;
+    background:var(--paper-raised); border-radius:14px; padding:26px 26px 22px; z-index:61; display:none;
+    box-shadow:0 12px 40px rgba(0,0,0,.25);
+  }
+  .confirm-modal.show{ display:block; }
+  .confirm-head{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .confirm-head h3{ margin:0; font-family:Georgia,serif; font-size:19px; }
+  .tick-sm{
+    width:26px; height:26px; border-radius:7px; background:var(--green); color:#fff; font-size:14px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .confirm-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 18px; }
+  .confirm-btns{ display:flex; gap:10px; margin-top:16px; }
+  .confirm-btns button{ flex:1; padding:12px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; }
+  .btn-cancel{ background:var(--paper-raised); border:1.5px solid var(--line); color:var(--ink-soft); }
+  .btn-place{ background:var(--orange); border:none; color:#fff; }
+
+  /* My Orders */
+  .orders-title{ font-family:Georgia,serif; }
+  .order-card{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;
+    margin-bottom:14px; box-shadow:var(--shadow);
+  }
+  .order-card .row1{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .order-card .oid{ font-weight:800; font-family:Georgia,serif; }
+  .order-card .status{ background:#FBEFE7; color:var(--gold-deep); font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .order-card .meta{ font-size:12.5px; color:var(--ink-soft); margin-bottom:6px; }
+  .order-card .items-list{ font-size:13px; color:var(--ink-soft); }
+
+  .toast{
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff;
+    padding:10px 18px; border-radius:8px; font-size:13.5px; z-index:50; opacity:0; transition:opacity .25s;
+  }
+  .toast.show{ opacity:1; }
+  .integration{ margin-top:26px; }
+  .integration summary{ cursor:pointer; font-weight:700; color:var(--ink-soft); font-size:13.5px; }
+  .integration .box{ background:var(--paper-raised); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-top:8px; font-size:13px; line-height:1.6; color:var(--ink-soft);}
+  .integration code{ background:#F1EBDB; padding:1px 5px; border-radius:4px; font-size:12px;}
+
+  /* Discount filter row */
+  .disc-strip{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; align-items:center; }
+  .disc-strip .lbl{ font-size:12px; font-weight:700; color:var(--ink-soft); margin-right:2px; }
+  .disc-pill{
+    border:1.5px solid #EBD3B7; background:#FFF8EF; padding:7px 14px;
+    border-radius:999px; cursor:pointer; font-size:12.5px; font-weight:700; color:var(--gold-deep);
+  }
+  .disc-pill.active{ background:var(--orange); border-color:var(--orange-deep); color:#fff; }
+  .sort-pill{
+    border:1.5px solid var(--line); background:var(--paper-raised); padding:7px 14px;
+    border-radius:999px; cursor:pointer; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-left:auto;
+  }
+  .sort-pill.active{ background:var(--ink); border-color:var(--ink); color:#fff; }
+
+  /* Highlighted discount tag on cards */
+  .card .ribbon.hot{
+    background:linear-gradient(120deg,#E1522F,#C1442A);
+  }
+
+  /* Excel rate-update control (no login needed — anyone at the store can use it) */
+  .excel-bar{
+    display:flex; align-items:center; gap:12px; background:var(--paper-raised); border:1.5px dashed #C9BFA4;
+    border-radius:var(--radius); padding:12px 16px; margin-bottom:20px; flex-wrap:wrap;
+  }
+  .excel-bar .txt{ font-size:12.5px; color:var(--ink-soft); flex:1; min-width:220px; }
+  .excel-bar label.upload-btn{
+    background:var(--green); color:#fff; padding:9px 16px; border-radius:8px; font-weight:700;
+    font-size:13px; cursor:pointer;
+  }
+  .excel-bar a.template-btn{
+    border:1.5px solid var(--line); color:var(--ink-soft); padding:9px 16px; border-radius:8px;
+    font-weight:700; font-size:13px; text-decoration:none; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="brandbar">
+  <span>Shivaji University Central Co-operative Consumer Stores Ltd., Kolhapur</span>
+  <span id="orderCountBrand">0 orders placed today</span>
+</div>
+
+<header class="top">
+  <div class="logo">
+    <div class="mark">SU</div>
+    <div>
+      <h1>SUK Bazaar</h1>
+      <p>Genuine discounts, finally visible</p>
+    </div>
+  </div>
+</header>
+
+<nav class="shop-nav">
+  <button class="shop-tab active" data-tab="shop">🛍️ Shop</button>
+  <button class="shop-tab" data-tab="orders">📦 My Orders</button>
+</nav>
+
+<div class="layout">
+
+  <!-- STORE VIEW -->
+  <section id="storeView">
+    <div class="promo">
+      <div>
+        <h2>Members save more than they think</h2>
+        <p>Every item below carries the store's real MRP and the discounted co-op rate side by side — no more guessing what's actually cheaper here than outside.</p>
+      </div>
+      <div class="savings">
+        <div class="num" id="avgSavings">—</div>
+        <div class="lbl">Avg. discount live now</div>
+      </div>
+    </div>
+
+    <div class="excel-bar">
+      <span class="txt">📊 Rates come from the store's Excel sheet. Update prices there, then load the file here — no sign-in needed.</span>
+      <label class="upload-btn" for="excelFile">⟳ Update rates from Excel</label>
+      <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(this)">
+      <a href="#" class="template-btn" onclick="downloadTemplate();return false;">Download current rates as Excel</a>
+    </div>
+
+    <div class="filters">
+      <input type="text" id="searchBox" placeholder="Search rice, dal, तेल, गहू...">
+      <span class="cat-pill active" data-cat="all">All</span>
+      <span class="cat-pill" data-cat="Cloth">Cloth</span>
+      <span class="cat-pill" data-cat="Grocery">Grocery</span>
+      <span class="cat-pill" data-cat="Provision">Provision & Stationery</span>
+    </div>
+    <div class="subcat-grid" id="subStrip"></div>
+    <div class="disc-strip">
+      <span class="lbl">Discount:</span>
+      <span class="disc-pill active" data-min="0">All</span>
+      <span class="disc-pill" data-min="10">10%+ off</span>
+      <span class="disc-pill" data-min="15">15%+ off</span>
+      <span class="disc-pill" data-min="20">20%+ off</span>
+      <span class="disc-pill" data-min="25">25%+ off</span>
+      <span class="sort-pill" id="sortPill">Sort: Highest discount first</span>
+    </div>
+
+    <div class="grid" id="productGrid"></div>
+    <div class="empty" id="emptyMsg" style="display:none">No items match your search yet.</div>
+
+    <details class="integration">
+      <summary>How rates and orders connect behind the scenes (setup notes)</summary>
+      <div class="box">
+        <b>1. Rates from Excel (manual).</b> "Update rates from Excel" above reads an .xlsx/.csv file right in the browser and matches rows to items by <b>Code</b>. Expected columns: <code>Code, Name, Marathi Name, Category, SubCategory, Size, MRP, Discount, Image URL</code>. Add a direct image link in <b>Image URL</b> (a shared Google Drive link or any public photo URL) and it shows up on that item's card automatically; leave it blank and the item keeps its colored icon.
+        <br><br>
+        <b>2. Rates from Google Sheet (automatic).</b> Already wired to the store's published Sheet — every edit there shows up here the next time the app is opened, no re-upload needed.
+        <br><br>
+        <b>3. Orders → Google Sheet.</b> A small Google Apps Script "Web App" bound to the store's order-tracking Sheet can accept each order posted from checkout (set its URL via <code>ORDER_WEBHOOK_URL</code>) and add it as a new row, status defaulting to "Packing".
+        <br><br>
+        <b>4. "Order ready" WhatsApp message.</b> When staff mark a Sheet row "Packed," an <code>onEdit</code> trigger can call the WhatsApp Business Cloud API with the customer's number — the same kind of setup already running for the RMC/Lanja citizen chatbot.
+        <br><br>
+        <b>5. Home delivery rule.</b> Enforced in the cart already — orders above ₹1000 qualify for delivery; the threshold is one constant in the code.
+        <br><br>
+        <b>6. Full item catalog.</b> The store's Cloth and Provision & Stationery lists (3,391 items total) were extracted from the PDFs into <code>suk_bazaar_full_item_seed.xlsx</code> — codes, sizes, and ~1,315 prices that were printed directly in the source list. Names need review (best-guess only) and the Grocery list still needs manual entry since its PDF had no readable text. Once reviewed, upload it here via "Update rates from Excel," or paste it into the Google Sheet for the automatic path above.
+      </div>
+    </details>
+  </section>
+
+  <!-- MY ORDERS VIEW -->
+  <section id="ordersView" style="display:none">
+    <h2 class="orders-title">📦 My Orders</h2>
+    <div id="ordersList"></div>
+  </section>
+
+</div>
+
+<div class="viewcart-bar" id="viewCartBar">
+  <div class="vc-left">
+    <span class="vc-icon">🛒</span>
+    <div>
+      <div class="vc-count" id="vcCount">0 items</div>
+      <div class="vc-total">₹<span id="vcTotal">0</span></div>
+    </div>
+  </div>
+  <button class="vc-btn" id="vcBtn">View Cart ›</button>
+</div>
+
+<div class="cartpage-overlay" id="cartPageOverlay"></div>
+<div class="cartpage" id="cartPage">
+  <div class="cartpage-header">
+    <button class="back-btn" id="cartPageBack">←</button>
+    <h2>My Cart</h2>
+    <span style="width:20px"></span>
+  </div>
+  <div class="cartpage-body" id="cartPageBody">
+    <div class="delivery-card">
+      <span class="d-icon">⏱️</span>
+      <div>
+        <div class="d-title" id="deliveryTitle">Pickup at the store</div>
+        <div class="d-sub" id="deliverySub">Shipment of <span id="cartPageCount">0</span> items</div>
+      </div>
+    </div>
+    <div class="cartpage-items" id="cartPageItems"></div>
+    <div class="bill-card">
+      <div class="bill-title">Bill details</div>
+      <div class="bill-row"><span>🧾 Items total</span><span><span class="saved-badge" id="savedBadge" style="display:none"></span><span id="billItemsTotal">₹0</span></span></div>
+      <div class="bill-row"><span>🛵 Delivery charge</span><span id="billDeliveryCharge">FREE</span></div>
+      <div class="bill-row big"><span>Grand total</span><span>₹<span id="billGrandTotal">0</span></span></div>
+    </div>
+    <div class="form-field"><label>Full name</label><input id="custName" placeholder="Your name"></div>
+    <div class="form-field"><label>Mobile number (for order-ready message)</label><input id="custPhone" placeholder="10-digit mobile"></div>
+    <p class="cancel-policy">Orders can be modified until you tap "Place Order." Once placed, the store team is notified immediately and starts packing.</p>
+  </div>
+  <div class="cartpage-footer">
+    <div>
+      <div class="cf-amt">₹<span id="cartPageFooterTotal">0</span></div>
+      <div class="cf-lbl">TOTAL</div>
+    </div>
+    <button class="cf-place-btn" id="cartPagePlaceBtn">Place Order ›</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmOverlay"></div>
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-head"><span class="tick-sm">✓</span><h3>Confirm Order</h3></div>
+  <p class="confirm-sub" id="confirmSub">Your order will be placed for pickup at the selected store.</p>
+  <div class="form-field" id="pickupTimeField">
+    <label>PICKUP TIME</label>
+    <input type="time" id="pickupTime">
+  </div>
+  <div class="form-field">
+    <label>SPECIAL INSTRUCTIONS (OPTIONAL)</label>
+    <input type="text" id="specialInstructions" placeholder="e.g. Pack rice separately">
+  </div>
+  <div class="confirm-btns">
+    <button class="btn-cancel" id="cancelConfirm">Cancel</button>
+    <button class="btn-place" id="finalPlaceOrder">🛒 Place Order</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DELIVERY_THRESHOLD = 1000;
+const ORDER_WEBHOOK_URL = ""; // paste the Google Apps Script Web App URL here when ready
+const RATES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRCT5BaiCmFmKfhJZQ0tOIzb_ZA95xBzcGllF-5pzgcyzHGWa_32Om15ziaQlTX0Fpe70uaFEXBbe-W/pub?gid=0&single=true&output=csv";
+
+let products = [
+  // Cloth — full item list extracted from the store's cloth division PDF
+  // (source PDF had no embedded prices, so these start at Rs.0 / "Rate not set")
+  {code:'1071', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'80 Cm', mrp:0, disc:0},
+  {code:'1072', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'95 Cm', mrp:0, disc:0},
+  {code:'1073', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'100 Cm', mrp:0, disc:0},
+  {code:'1074', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'75 Cm', mrp:0, disc:0},
+  {code:'1082', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'90 Cm', mrp:0, disc:0},
+  {code:'1083', name:'Saree', nameMr:'', cat:'Cloth', subCat:'Sarees', size:'', mrp:0, disc:0},
+  {code:'115', name:'Bedsheet', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'116', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'75 Cm', mrp:0, disc:0},
+  {code:'117', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'118', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'80 Cm', mrp:0, disc:0},
+  {code:'119', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'85 Cm', mrp:0, disc:0},
+  {code:'120', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'85 Cm', mrp:0, disc:0},
+  {code:'121', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'80 Cm', mrp:0, disc:0},
+  {code:'122', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'90 Cm', mrp:0, disc:0},
+  {code:'123', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'90 Cm', mrp:0, disc:0},
+  {code:'124', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'95 Cm', mrp:0, disc:0},
+  {code:'125', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'95 Cm', mrp:0, disc:0},
+  {code:'126', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'100 Cm', mrp:0, disc:0},
+  {code:'127', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'100 Cm', mrp:0, disc:0},
+  {code:'128', name:'Cloth Item 128', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'146', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'147', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'148', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'149', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'150', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'151', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'152', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'153', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'154', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'155', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'156', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'157', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'158', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'159', name:'Jacket Salwar Kurta', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'160', name:'Cloth Item 160', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:12.0, disc:0},
+  {code:'161', name:'Towel', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:24.0, disc:0},
+  {code:'162', name:'Cloth Item 162', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:12.0, disc:0},
+  {code:'164', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'165', name:'Napkin', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:14.0, disc:0},
+  {code:'166', name:'Napkin', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'881', name:'Towel', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:22.0, disc:0},
+  {code:'920', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'85 Cm', mrp:0, disc:0},
+  {code:'921', name:'Cloth Item 921', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'922', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'923', name:'Towel', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:150.0, disc:0},
+  {code:'924', name:'Cloth Item 924', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:245.0, disc:0},
+  {code:'1801', name:'Bedsheet', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'5646', name:'Towel', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:299.0, disc:0},
+  {code:'9362', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'4251', name:'Cloth Item 4251', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'XL', mrp:0, disc:0},
+  {code:'8827', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9603', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'85 Cm', mrp:0, disc:0},
+  {code:'9578', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9579', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9580', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9581', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9582', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9583', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9584', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9350', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9351', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9352', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9353', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9354', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9355', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9601', name:'Cloth Item 9601', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9604', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'90 Cm', mrp:0, disc:0},
+  {code:'9605', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'95 Cm', mrp:0, disc:0},
+  {code:'9607', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'100 Cm', mrp:0, disc:0},
+  {code:'9608', name:'Ladies Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'80 Cm', mrp:0, disc:0},
+  {code:'9615', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'2027', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9694', name:'Shirt', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'145', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'163', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'132', name:'Napkin', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9670', name:'Cloth Item 9670', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'xXL', mrp:0, disc:0},
+  {code:'9577', name:'Cloth Item 9577', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'7946', name:'Cloth Item 7946', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'1944', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'2106', name:'Cloth Item 2106', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'6223', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'8163', name:'Cloth Item 8163', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'8826', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'8822', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'8823', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'8824', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'8825', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'129', name:'Gown', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'130', name:'Petticoat', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'131', name:'Petticoat', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'133', name:'Napkin', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'134', name:'Cloth Item 134', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'135', name:'Cloth Duster', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'136', name:'Towel', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:150.0, disc:0},
+  {code:'137', name:'Cloth Item 137', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'138', name:'Towel', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'139', name:'Towel', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:80.0, disc:0},
+  {code:'140', name:'Socks', nameMr:'', cat:'Cloth', subCat:'Socks', size:'', mrp:0, disc:0},
+  {code:'141', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'142', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'143', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'144', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'8860', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'8861', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'8862', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'8863', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'3416', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'1972', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2065', name:'Cloth Item 2065', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:8.0, disc:0},
+  {code:'2066', name:'Cloth Item 2066', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2067', name:'Cloth Item 2067', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2092', name:'Cloth Item 2092', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2196', name:'Cloth Duster', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:16.0, disc:0},
+  {code:'2378', name:'Cloth Item 2378', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:38.0, disc:0},
+  {code:'2379', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2455', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2485', name:'Cloth Item 2485', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2622', name:'Cloth Item 2622', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2626', name:'Cloth Item 2626', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:18.0, disc:0},
+  {code:'2916', name:'Cloth Item 2916', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'2942', name:'Saree', nameMr:'', cat:'Cloth', subCat:'Sarees', size:'', mrp:0, disc:0},
+  {code:'2988', name:'Napkin', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'3023', name:'Gown', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'3094', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'3290', name:'Cloth Item 3290', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'3972', name:'Napkin', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:35.0, disc:0},
+  {code:'5259', name:'Cloth Item 5259', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'205', name:'Shirt', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'204', name:'Shirt', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'203', name:'Ladies Pant', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'202', name:'Cloth Item 202', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'201', name:'Cloth Item 201', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'174', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'217', name:'Cloth Item 217', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'295', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'7454', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'7970', name:'Cloth Item 7970', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'6 kg', mrp:0, disc:0},
+  {code:'7971', name:'Cloth Item 7971', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'3120', name:'Cloth Item 3120', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'7092', name:'Cloth Item 7092', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9999', name:'Cloth Item 9999', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9663', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9664', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9665', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'9666', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9667', name:'Pant', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9668', name:'Cloth Item 9668', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9669', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9691', name:'Shirt', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9770', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'9771', name:'Nighty', nameMr:'', cat:'Cloth', subCat:'Nightwear', size:'', mrp:0, disc:0},
+  {code:'1366', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'6976', name:'Cloth Item 6976', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9160', name:'Cloth Item 9160', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'694', name:'Socks Ladies', nameMr:'', cat:'Cloth', subCat:'Socks', size:'', mrp:0, disc:0},
+  {code:'5580', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'5581', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'5582', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'5583', name:'Banian/Vest', nameMr:'', cat:'Cloth', subCat:'Innerwear', size:'', mrp:0, disc:0},
+  {code:'8124', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9808', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9809', name:'Cloth Item 9809', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9810', name:'Cloth Item 9810', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9990', name:'Cloth', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+  {code:'9671', name:'Cloth Item 9671', nameMr:'', cat:'Cloth', subCat:'Bedding', size:'', mrp:0, disc:0},
+
+  // Grocery — sample items (source grocery PDF had no extractable text/prices at all)
+  {code:"G-101", name:"Toor Dal", nameMr:"तूर डाळ", cat:"Grocery", subCat:"Pulses", size:"1 kg", mrp:160, disc:8},
+  {code:"G-102", name:"Sunflower Oil", nameMr:"सूर्यफूल तेल", cat:"Grocery", subCat:"Oils", size:"1 L", mrp:150, disc:6},
+  {code:"G-103", name:"Basmati Rice", nameMr:"बासमती तांदूळ", cat:"Grocery", subCat:"Grains", size:"5 kg", mrp:520, disc:10},
+  {code:"G-104", name:"Wheat Atta", nameMr:"गहू पीठ", cat:"Grocery", subCat:"Flours", size:"5 kg", mrp:230, disc:7},
+  {code:"G-105", name:"Sugar", nameMr:"साखर", cat:"Grocery", subCat:"Household", size:"1 kg", mrp:48, disc:5},
+  {code:"G-106", name:"Tea Powder", nameMr:"चहा पूड", cat:"Grocery", subCat:"Beverages", size:"250 g", mrp:120, disc:9},
+  {code:"G-107", name:"Chana Dal", nameMr:"चणा डाळ", cat:"Grocery", subCat:"Pulses", size:"1 kg", mrp:110, disc:8},
+  {code:"G-108", name:"Groundnut Oil", nameMr:"शेंगदाणा तेल", cat:"Grocery", subCat:"Oils", size:"1 L", mrp:190, disc:6},
+  {code:"G-109", name:"Salt (Iodised)", nameMr:"मीठ", cat:"Grocery", subCat:"Household", size:"1 kg", mrp:22, disc:0},
+  {code:"G-110", name:"Turmeric Powder", nameMr:"हळद पूड", cat:"Grocery", subCat:"Spices", size:"200 g", mrp:65, disc:10},
+
+  // Provision & Stationery — items with both a name hint AND a price found in the source PDF
+  // (628 of 3,225 rows qualified; the rest are in the seed Excel file pending review)
+  {code:'16', name:'Liquid Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:65.0, disc:0},
+  {code:'3892', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:125.0, disc:0},
+  {code:'3895', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:195.0, disc:0},
+  {code:'1310', name:'Powder Surf', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:81.0, disc:0},
+  {code:'2', name:'Carry Bag', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'8', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'11', name:'Johnson\'s Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:44.0, disc:0},
+  {code:'13', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:30.0, disc:0},
+  {code:'9', name:'Nycil Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'6', name:'Nycil Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:130.0, disc:0},
+  {code:'7', name:'Nycil Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'1313', name:'Surf Excel Powder', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:99.0, disc:0},
+  {code:'1340', name:'Godrej', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'1379', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:247.0, disc:0},
+  {code:'306', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:66.0, disc:0},
+  {code:'309', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:45.0, disc:0},
+  {code:'249', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'313', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:30.0, disc:0},
+  {code:'329', name:'Godrej Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:25.0, disc:0},
+  {code:'346', name:'Godrej Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:125.0, disc:0},
+  {code:'347', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:100.0, disc:0},
+  {code:'348', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'352', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:20.0, disc:0},
+  {code:'355', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:42.0, disc:0},
+  {code:'358', name:'Soap Vim', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:43.0, disc:0},
+  {code:'361', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:50.0, disc:0},
+  {code:'375', name:'Dhoop', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:12.0, disc:0},
+  {code:'376', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'385', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'386', name:'Girnar Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:150.0, disc:0},
+  {code:'387', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:30.0, disc:0},
+  {code:'402', name:'Everest Masala', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:96.0, disc:0},
+  {code:'409', name:'Tiger', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:5.0, disc:0},
+  {code:'413', name:'Soap Vim', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'417', name:'Soap Rin', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'426', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:25.0, disc:0},
+  {code:'427', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'429', name:'Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:99.0, disc:0},
+  {code:'431', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:9.4, disc:0},
+  {code:'437', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:56.0, disc:0},
+  {code:'438', name:'Britannia Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'439', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:32.0, disc:0},
+  {code:'447', name:'Soap Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'448', name:'Soap Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:45.0, disc:0},
+  {code:'454', name:'Dabur', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:70.0, disc:0},
+  {code:'457', name:'Prill', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:15.0, disc:0},
+  {code:'460', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:38.0, disc:0},
+  {code:'471', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:62.0, disc:0},
+  {code:'478', name:'Pepsodent', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:82.0, disc:0},
+  {code:'484', name:'Harpic', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:110.0, disc:0},
+  {code:'486', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'487', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:198.0, disc:0},
+  {code:'488', name:'Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:2.0, disc:0},
+  {code:'490', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:20.0, disc:0},
+  {code:'502', name:'Godrej Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:25.0, disc:0},
+  {code:'504', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'506', name:'Soap Vim', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:30.0, disc:0},
+  {code:'513', name:'Chocolate Candy Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:50.0, disc:0},
+  {code:'519', name:'Shevaya/Noodles', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:20.0, disc:0},
+  {code:'530', name:'Colgate', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:230.0, disc:0},
+  {code:'531', name:'Colgate', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:135.0, disc:0},
+  {code:'532', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'535', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'1 KG', mrp:114.0, disc:0},
+  {code:'536', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:125.0, disc:0},
+  {code:'537', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:102.0, disc:0},
+  {code:'541', name:'Hair', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:89.0, disc:0},
+  {code:'542', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:40.0, disc:0},
+  {code:'545', name:'Ice Cream Chocolate Cup', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.0, disc:0},
+  {code:'546', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:25.0, disc:0},
+  {code:'549', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:16.0, disc:0},
+  {code:'562', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:70.0, disc:0},
+  {code:'573', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:65.0, disc:0},
+  {code:'575', name:'Agarbatti', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'576', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'579', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:73.0, disc:0},
+  {code:'581', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'583', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'584', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'589', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:440.0, disc:0},
+  {code:'600', name:'Cell/Battery', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:17.0, disc:0},
+  {code:'608', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:6.0, disc:0},
+  {code:'609', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:15.0, disc:0},
+  {code:'616', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'622', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'626', name:'Patanjali Biscuit Milk', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:5.0, disc:0},
+  {code:'629', name:'Pencil', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:6.0, disc:0},
+  {code:'642', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:9.4, disc:0},
+  {code:'655', name:'Khaki', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:2.0, disc:0},
+  {code:'677', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'686', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:19.0, disc:0},
+  {code:'690', name:'Cadbury', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:25.0, disc:0},
+  {code:'692', name:'Brush', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:2.0, disc:0},
+  {code:'697', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:32.0, disc:0},
+  {code:'699', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:120.0, disc:0},
+  {code:'703', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'728', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:44.0, disc:0},
+  {code:'811', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:35.0, disc:0},
+  {code:'738', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'746', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:15.0, disc:0},
+  {code:'748', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:20.0, disc:0},
+  {code:'753', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:45.0, disc:0},
+  {code:'754', name:'Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:99.0, disc:0},
+  {code:'755', name:'Pen Cell/Battery', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'778', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'780', name:'Wiper', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:95.0, disc:0},
+  {code:'782', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:30.0, disc:0},
+  {code:'786', name:'Jhadu/Broom', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:75.0, disc:0},
+  {code:'790', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:10.0, disc:0},
+  {code:'791', name:'Soap Vim', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:5.0, disc:0},
+  {code:'792', name:'Soap Vim', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:30.0, disc:0},
+  {code:'799', name:'Cadbury', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:50.0, disc:0},
+  {code:'803', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:20.0, disc:0},
+  {code:'804', name:'Powder Surf', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:290.0, disc:0},
+  {code:'805', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'807', name:'Surf', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:120.0, disc:0},
+  {code:'808', name:'Powder Surf', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:177.0, disc:0},
+  {code:'819', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'822', name:'Pen Cell/Battery', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'824', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'833', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:5.0, disc:0},
+  {code:'1037', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:10.0, disc:0},
+  {code:'1039', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:192.0, disc:0},
+  {code:'1049', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:49.0, disc:0},
+  {code:'1076', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'1084', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:62.0, disc:0},
+  {code:'1090', name:'Pati/Box', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'1094', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'1097', name:'Ponds', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:59.0, disc:0},
+  {code:'1098', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:65.0, disc:0},
+  {code:'1100', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:130.0, disc:0},
+  {code:'1105', name:'Brush', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'1150', name:'Patanjali', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'1155', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:25.0, disc:0},
+  {code:'1165', name:'Shevaya/Noodles', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:70.0, disc:0},
+  {code:'1166', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:120.0, disc:0},
+  {code:'1175', name:'Sunfeast', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:20.0, disc:0},
+  {code:'1176', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:11.0, disc:0},
+  {code:'1179', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:20.0, disc:0},
+  {code:'1182', name:'Jhadu/Broom', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:160.0, disc:0},
+  {code:'1183', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:55.0, disc:0},
+  {code:'1141', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:165.0, disc:0},
+  {code:'1147', name:'Colgate', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:115.0, disc:0},
+  {code:'1186', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:5.0, disc:0},
+  {code:'1208', name:'Ponds', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:10.0, disc:0},
+  {code:'1209', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:25.0, disc:0},
+  {code:'1215', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:150.0, disc:0},
+  {code:'1189', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:156.0, disc:0},
+  {code:'1196', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:225.0, disc:0},
+  {code:'1220', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:100.0, disc:0},
+  {code:'1221', name:'Johnson\'s Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:92.0, disc:0},
+  {code:'1222', name:'Cotton', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:295.0, disc:0},
+  {code:'1238', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'1239', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:85.0, disc:0},
+  {code:'1266', name:'Biscuit Wafers', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'3909', name:'Godrej', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:53.0, disc:0},
+  {code:'3911', name:'Nycil Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:150.0, disc:0},
+  {code:'3925', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:23.0, disc:0},
+  {code:'3929', name:'Himalaya', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:30.0, disc:0},
+  {code:'3935', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:2.0, disc:0},
+  {code:'3936', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:5.0, disc:0},
+  {code:'3948', name:'Cloth', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:120.0, disc:0},
+  {code:'3967', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:112.0, disc:0},
+  {code:'3975', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'3994', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'3837', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'3847', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'4024', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:155.0, disc:0},
+  {code:'4026', name:'Godrej', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:85.0, disc:0},
+  {code:'4028', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:57.0, disc:0},
+  {code:'4034', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'4042', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'1 KG', mrp:132.0, disc:0},
+  {code:'3884', name:'Himalaya', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:95.0, disc:0},
+  {code:'4056', name:'Wafers', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'4072', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'4073', name:'Tiger', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'4077', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:30.0, disc:0},
+  {code:'4082', name:'Tiger', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'4752', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:5.0, disc:0},
+  {code:'4773', name:'Lifebuoy', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:99.0, disc:0},
+  {code:'4775', name:'Powder Milk', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:5.0, disc:0},
+  {code:'4898', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:100.0, disc:0},
+  {code:'4901', name:'Himalaya', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:100.0, disc:0},
+  {code:'4315', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:76.0, disc:0},
+  {code:'4316', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'4327', name:'Biscuit Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'4328', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:25.0, disc:0},
+  {code:'4330', name:'Cadbury', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:5.0, disc:0},
+  {code:'4358', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:65.0, disc:0},
+  {code:'4373', name:'Conditioner', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:285.0, disc:0},
+  {code:'4099', name:'Carry Bag', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:150.0, disc:0},
+  {code:'4129', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:55.0, disc:0},
+  {code:'4135', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'4138', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:9.0, disc:0},
+  {code:'4156', name:'Curd', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:20.0, disc:0},
+  {code:'4133', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:2.0, disc:0},
+  {code:'4169', name:'Wafers', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'4207', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'4222', name:'Cadbury', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:25.0, disc:0},
+  {code:'4225', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:5.0, disc:0},
+  {code:'4018', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:36.0, disc:0},
+  {code:'4088', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:20.0, disc:0},
+  {code:'4091', name:'Girnar Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:150.0, disc:0},
+  {code:'4109', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:35.0, disc:0},
+  {code:'4116', name:'Brush', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:25.0, disc:0},
+  {code:'4132', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'4145', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:25.0, disc:0},
+  {code:'4202', name:'Chocolate Plate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:2.0, disc:0},
+  {code:'4234', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:10.0, disc:0},
+  {code:'4287', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:30.0, disc:0},
+  {code:'4289', name:'Agarbatti', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'4237', name:'Patanjali', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:95.0, disc:0},
+  {code:'4239', name:'Girnar Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:135.0, disc:0},
+  {code:'4290', name:'Pant', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'4491', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'4561', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:68.0, disc:0},
+  {code:'4854', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'4894', name:'Himalaya Soap', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:62.0, disc:0},
+  {code:'4804', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'4809', name:'Dhoop', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:35.0, disc:0},
+  {code:'4569', name:'Patanjali Brush', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'4595', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:49.0, disc:0},
+  {code:'4426', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:75.0, disc:0},
+  {code:'4644', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:30.0, disc:0},
+  {code:'4510', name:'Britannia Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'4511', name:'Britannia Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'4514', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:20.0, disc:0},
+  {code:'4515', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:10.0, disc:0},
+  {code:'4631', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:38.0, disc:0},
+  {code:'4709', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:25.0, disc:0},
+  {code:'4946', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:5.0, disc:0},
+  {code:'4948', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:8.9, disc:0},
+  {code:'4970', name:'Pepsodent', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:85.0, disc:0},
+  {code:'4976', name:'Pen Cell/Battery', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:20.0, disc:0},
+  {code:'4977', name:'Pencil', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:3.0, disc:0},
+  {code:'4997', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:7.0, disc:0},
+  {code:'5011', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:75.0, disc:0},
+  {code:'5012', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'5024', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:225.0, disc:0},
+  {code:'5042', name:'Dhoop', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:12.0, disc:0},
+  {code:'5013', name:'Liquid Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:75.0, disc:0},
+  {code:'5025', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:235.0, disc:0},
+  {code:'5114', name:'Godrej', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:210.0, disc:0},
+  {code:'5200', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'5213', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:5.0, disc:0},
+  {code:'5247', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:38.0, disc:0},
+  {code:'5340', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:25.0, disc:0},
+  {code:'7814', name:'Surf', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:175.0, disc:0},
+  {code:'7841', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.0, disc:0},
+  {code:'7842', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.0, disc:0},
+  {code:'7844', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.0, disc:0},
+  {code:'7845', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:45.0, disc:0},
+  {code:'7847', name:'Ice Cream Cup', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'7848', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:105.0, disc:0},
+  {code:'7849', name:'Ice Cream Cup', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'8338', name:'Dhoop', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:12.0, disc:0},
+  {code:'5364', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:140.0, disc:0},
+  {code:'5393', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:260.0, disc:0},
+  {code:'7990', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:150.0, disc:0},
+  {code:'5726', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:25.0, disc:0},
+  {code:'5736', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:62.0, disc:0},
+  {code:'5511', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:210.0, disc:0},
+  {code:'5544', name:'Pen Cell/Battery', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:30.0, disc:0},
+  {code:'5545', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:30.0, disc:0},
+  {code:'5429', name:'Shampoo Pen', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:79.0, disc:0},
+  {code:'5456', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:56.0, disc:0},
+  {code:'5469', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:25.0, disc:0},
+  {code:'5749', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:105.0, disc:0},
+  {code:'5750', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'5753', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:28.0, disc:0},
+  {code:'5870', name:'Parle Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'6060', name:'Brush', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'6745', name:'Himalaya', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:115.0, disc:0},
+  {code:'7104', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:15.0, disc:0},
+  {code:'7260', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:5.0, disc:0},
+  {code:'7322', name:'Surf', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:199.0, disc:0},
+  {code:'7509', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'7635', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:9.0, disc:0},
+  {code:'7850', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:30.0, disc:0},
+  {code:'7932', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'7933', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:4.0, disc:0},
+  {code:'7529', name:'Napkin', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:65.0, disc:0},
+  {code:'8029', name:'Chocolate Cadbury', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:5.0, disc:0},
+  {code:'5593', name:'Agarbatti', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:20.0, disc:0},
+  {code:'5713', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:20.0, disc:0},
+  {code:'5717', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'1 Kg', mrp:290.0, disc:0},
+  {code:'5777', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'5778', name:'Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:120.0, disc:0},
+  {code:'5637', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'1 Kg', mrp:570.0, disc:0},
+  {code:'5841', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'5844', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:8.9, disc:0},
+  {code:'5871', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'5909', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:4.0, disc:0},
+  {code:'5654', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'5655', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'7812', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'5860', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:160.0, disc:0},
+  {code:'5865', name:'Britannia Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'5866', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:5.0, disc:0},
+  {code:'7851', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'6543', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:25.0, disc:0},
+  {code:'6325', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:25.0, disc:0},
+  {code:'7526', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:72.0, disc:0},
+  {code:'8907', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:46.0, disc:0},
+  {code:'8958', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'5808', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:70.0, disc:0},
+  {code:'7852', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'5815', name:'Agarbatti', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:25.0, disc:0},
+  {code:'8959', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'9118', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'9254', name:'Vim', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:58.0, disc:0},
+  {code:'9255', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'9264', name:'Liquid Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:25.0, disc:0},
+  {code:'9265', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:35.0, disc:0},
+  {code:'5974', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:36.0, disc:0},
+  {code:'7853', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'7854', name:'Ice Cream Chocolate Cup', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:25.0, disc:0},
+  {code:'7855', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:15.0, disc:0},
+  {code:'8653', name:'Wiper', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:190.0, disc:0},
+  {code:'8961', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:5.0, disc:0},
+  {code:'8962', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'7857', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:30.0, disc:0},
+  {code:'7858', name:'Ice Cream Cup', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:18.0, disc:0},
+  {code:'9125', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:38.0, disc:0},
+  {code:'9404', name:'Curd', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:78.0, disc:0},
+  {code:'9714', name:'Soap Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'6213', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'6269', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:40.0, disc:0},
+  {code:'6296', name:'Liquid Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'6800', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:215.0, disc:0},
+  {code:'6894', name:'Surf Excel Soap', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:20.0, disc:0},
+  {code:'6966', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:65.0, disc:0},
+  {code:'7374', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'7177', name:'Vim', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:50.0, disc:0},
+  {code:'8084', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:43.0, disc:0},
+  {code:'7544', name:'Girnar', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:75.0, disc:0},
+  {code:'7942', name:'Biscuit Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'8550', name:'Pen Cell/Battery', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:20.0, disc:0},
+  {code:'8830', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:144.0, disc:0},
+  {code:'8798', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:140.0, disc:0},
+  {code:'9070', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'9209', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:42.0, disc:0},
+  {code:'9087', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:22.0, disc:0},
+  {code:'9089', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'9090', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'9091', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:6.0, disc:0},
+  {code:'9092', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'9233', name:'Soap Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:150.0, disc:0},
+  {code:'9234', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:125.0, disc:0},
+  {code:'17', name:'Parle Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'827', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:7.0, disc:0},
+  {code:'829', name:'Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:1.0, disc:0},
+  {code:'832', name:'Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:1.0, disc:0},
+  {code:'903', name:'Pen Cell/Battery', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'918', name:'Biscuit Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'887', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'891', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:120.0, disc:0},
+  {code:'893', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:45.0, disc:0},
+  {code:'899', name:'Cloth', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:20.0, disc:0},
+  {code:'986', name:'Glass', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:2.0, disc:0},
+  {code:'1305', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'1418', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:75.0, disc:0},
+  {code:'1460', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'1488', name:'Jhadu/Broom', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:95.0, disc:0},
+  {code:'1503', name:'Himalaya Soap', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:36.0, disc:0},
+  {code:'1506', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:15.0, disc:0},
+  {code:'1516', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'1517', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:10.0, disc:0},
+  {code:'1523', name:'Conditioner', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:4.0, disc:0},
+  {code:'1565', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'1431', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'1433', name:'Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:30.0, disc:0},
+  {code:'1600', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:25.0, disc:0},
+  {code:'1619', name:'Ice Cream Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:45.0, disc:0},
+  {code:'1621', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'1651', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'1665', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'1701', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'1702', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:5.0, disc:0},
+  {code:'1751', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'1752', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'1Kg', mrp:85.0, disc:0},
+  {code:'1754', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:45.0, disc:0},
+  {code:'1767', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:176.0, disc:0},
+  {code:'1784', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'1786', name:'Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:28.0, disc:0},
+  {code:'1788', name:'Prill', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:55.0, disc:0},
+  {code:'1549', name:'Girnar Tea Duster', nameMr:'', cat:'Provision', subCat:'Household', size:'1 kg', mrp:380.0, disc:0},
+  {code:'1552', name:'Wafers', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'1553', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:75.0, disc:0},
+  {code:'1816', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'1821', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:115.0, disc:0},
+  {code:'1823', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:25.0, disc:0},
+  {code:'1836', name:'Agarbatti', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'1860', name:'Conditioner', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:120.0, disc:0},
+  {code:'1862', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'1866', name:'Ghee', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:140.0, disc:0},
+  {code:'1867', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:170.0, disc:0},
+  {code:'1642', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:80.0, disc:0},
+  {code:'1878', name:'Biscuit Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'1885', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:150.0, disc:0},
+  {code:'1886', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'1691', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:15.0, disc:0},
+  {code:'1967', name:'Everest Masala', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'1982', name:'Biscuit Sunfeast', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'2001', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:32.0, disc:0},
+  {code:'2013', name:'Cadbury', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'2031', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'2035', name:'Agarbatti', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'9395', name:'Biscuit Tiger', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'9396', name:'Biscuit Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'9399', name:'Tiger', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:5.0, disc:0},
+  {code:'9400', name:'Biscuit Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:140.0, disc:0},
+  {code:'9402', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:180.0, disc:0},
+  {code:'1207', name:'Godrej', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:15.0, disc:0},
+  {code:'555', name:'Conditioner', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:5.0, disc:0},
+  {code:'701', name:'Ponds', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:15.0, disc:0},
+  {code:'797', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:150.0, disc:0},
+  {code:'2081', name:'Milk', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:185.0, disc:0},
+  {code:'2099', name:'Lifebuoy Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:120.0, disc:0},
+  {code:'2063', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'2164', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:190.0, disc:0},
+  {code:'2191', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:120.0, disc:0},
+  {code:'2207', name:'Surf Excel Powder', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:10.0, disc:0},
+  {code:'2208', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:9.0, disc:0},
+  {code:'2020', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'2021', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:2.0, disc:0},
+  {code:'2023', name:'Dettol Powder', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'2260', name:'Lifebuoy Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'2263', name:'Soap Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:38.0, disc:0},
+  {code:'2264', name:'Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:99.0, disc:0},
+  {code:'2265', name:'Soap Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'2267', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:60.0, disc:0},
+  {code:'2271', name:'Godrej Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:145.0, disc:0},
+  {code:'2273', name:'Godrej Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:130.0, disc:0},
+  {code:'2274', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:125.0, disc:0},
+  {code:'2279', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:115.0, disc:0},
+  {code:'2285', name:'Ice Cream Cup', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'2304', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:120.0, disc:0},
+  {code:'2310', name:'Tiger', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:140.0, disc:0},
+  {code:'2311', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:38.0, disc:0},
+  {code:'2318', name:'Girnar Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:65.0, disc:0},
+  {code:'2345', name:'Cadbury', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:30.0, disc:0},
+  {code:'2370', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:149.0, disc:0},
+  {code:'2371', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:2.0, disc:0},
+  {code:'2373', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:10.0, disc:0},
+  {code:'2375', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:125.0, disc:0},
+  {code:'6341', name:'Cloth', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:35.0, disc:0},
+  {code:'6448', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:50.0, disc:0},
+  {code:'6529', name:'Sunfeast', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'6687', name:'Surf', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:225.0, disc:0},
+  {code:'6697', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'9480', name:'Parle Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'9488', name:'Patanjali', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:60.0, disc:0},
+  {code:'9490', name:'Biscuit Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.6, disc:0},
+  {code:'9558', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'9559', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:55.0, disc:0},
+  {code:'9560', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'9561', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'9562', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'9564', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'9565', name:'Parle Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'9566', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:50.0, disc:0},
+  {code:'9567', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.0, disc:0},
+  {code:'9569', name:'Britannia Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:15.0, disc:0},
+  {code:'1495', name:'Duster', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:90.0, disc:0},
+  {code:'1620', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'9556', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:15.0, disc:0},
+  {code:'9613', name:'Dabur', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:18.0, disc:0},
+  {code:'2377', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:270.0, disc:0},
+  {code:'2384', name:'Britannia Chocolate Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:15.0, disc:0},
+  {code:'2391', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'2395', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'2414', name:'Liquid Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:149.0, disc:0},
+  {code:'2415', name:'Shevaya/Noodles', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:25.0, disc:0},
+  {code:'2445', name:'Soap Dabur', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:96.0, disc:0},
+  {code:'2447', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'2448', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:225.0, disc:0},
+  {code:'2450', name:'Lifebuoy Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:130.0, disc:0},
+  {code:'2229', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'2419', name:'Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:35.0, disc:0},
+  {code:'2240', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:5.0, disc:0},
+  {code:'2453', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:25.0, disc:0},
+  {code:'2466', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:10.0, disc:0},
+  {code:'2425', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:95.0, disc:0},
+  {code:'2436', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:35.0, disc:0},
+  {code:'2437', name:'Vim', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:32.0, disc:0},
+  {code:'2438', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:15.0, disc:0},
+  {code:'2475', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:243.0, disc:0},
+  {code:'2476', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:2.0, disc:0},
+  {code:'2478', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:68.0, disc:0},
+  {code:'2479', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:139.0, disc:0},
+  {code:'2483', name:'Cotton', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:315.0, disc:0},
+  {code:'2535', name:'Conditioner', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:285.0, disc:0},
+  {code:'2650', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:65.0, disc:0},
+  {code:'2686', name:'Cake', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:15.0, disc:0},
+  {code:'2691', name:'Pati/Box', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'2695', name:'Soap Vim', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'2706', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:54.0, disc:0},
+  {code:'2707', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'2708', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:60.0, disc:0},
+  {code:'2710', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:90.0, disc:0},
+  {code:'2506', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:40.0, disc:0},
+  {code:'2516', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:7.0, disc:0},
+  {code:'2578', name:'Cadbury', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'2640', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:140.0, disc:0},
+  {code:'2598', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:35.0, disc:0},
+  {code:'2631', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:55.0, disc:0},
+  {code:'2632', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:55.0, disc:0},
+  {code:'2641', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:85.0, disc:0},
+  {code:'2723', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:50.0, disc:0},
+  {code:'2731', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.0, disc:0},
+  {code:'2733', name:'Godrej', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:25.0, disc:0},
+  {code:'2735', name:'Dabur', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:40.0, disc:0},
+  {code:'2796', name:'Chocolate Candy Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:89.0, disc:0},
+  {code:'2684', name:'Colgate', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:10.0, disc:0},
+  {code:'2749', name:'Dabur', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:15.0, disc:0},
+  {code:'2771', name:'Godrej', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:60.0, disc:0},
+  {code:'2799', name:'Tiger', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:49.0, disc:0},
+  {code:'2803', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:27.0, disc:0},
+  {code:'2813', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:70.0, disc:0},
+  {code:'2855', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.0, disc:0},
+  {code:'2888', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:65.0, disc:0},
+  {code:'2918', name:'Camphor', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'2948', name:'Lifebuoy Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:60.0, disc:0},
+  {code:'9627', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:30.0, disc:0},
+  {code:'3150', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:9.0, disc:0},
+  {code:'3151', name:'Conditioner', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:5.0, disc:0},
+  {code:'3162', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:130.0, disc:0},
+  {code:'3173', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:7.0, disc:0},
+  {code:'3175', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:86.0, disc:0},
+  {code:'3176', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:35.0, disc:0},
+  {code:'2878', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'2910', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:93.0, disc:0},
+  {code:'2982', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:145.0, disc:0},
+  {code:'3008', name:'Hair', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:95.0, disc:0},
+  {code:'3009', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:68.0, disc:0},
+  {code:'3025', name:'Cloth', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'3181', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:285.0, disc:0},
+  {code:'3773', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:140.0, disc:0},
+  {code:'3776', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:99.0, disc:0},
+  {code:'3778', name:'Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:4.0, disc:0},
+  {code:'3788', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:4.0, disc:0},
+  {code:'3804', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:120.0, disc:0},
+  {code:'3808', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:148.0, disc:0},
+  {code:'3810', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:144.0, disc:0},
+  {code:'2975', name:'Duster', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:5.0, disc:0},
+  {code:'3002', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:96.0, disc:0},
+  {code:'3003', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:30.0, disc:0},
+  {code:'3047', name:'Agarbatti', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:15.0, disc:0},
+  {code:'3013', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:35.0, disc:0},
+  {code:'3128', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:175.0, disc:0},
+  {code:'3129', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:50.0, disc:0},
+  {code:'3201', name:'Agarbatti', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'3204', name:'Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:5.0, disc:0},
+  {code:'3223', name:'Lifebuoy', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:199.0, disc:0},
+  {code:'3041', name:'Fair&Lovely', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:89.0, disc:0},
+  {code:'3101', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:35.0, disc:0},
+  {code:'3115', name:'Ice Cream Cup', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:45.0, disc:0},
+  {code:'6696', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:184.0, disc:0},
+  {code:'3035', name:'Brush', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:69.0, disc:0},
+  {code:'3036', name:'Godrej Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'3038', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'3119', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:45.0, disc:0},
+  {code:'3215', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:132.0, disc:0},
+  {code:'3222', name:'Lifebuoy Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:45.0, disc:0},
+  {code:'3230', name:'Wafers', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'3234', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'3238', name:'Girnar Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:135.0, disc:0},
+  {code:'3275', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:50.0, disc:0},
+  {code:'3276', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:20.0, disc:0},
+  {code:'3278', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:55.0, disc:0},
+  {code:'3280', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:60.0, disc:0},
+  {code:'3311', name:'Soap Dettol', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'3313', name:'Spray', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:190.0, disc:0},
+  {code:'3258', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'3259', name:'Tea', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:115.0, disc:0},
+  {code:'3269', name:'Cotton', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:275.0, disc:0},
+  {code:'3297', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:36.0, disc:0},
+  {code:'3342', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'3287', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'3337', name:'Powder Sargam', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'3360', name:'Biscuit', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:9.0, disc:0},
+  {code:'3299', name:'Everest Masala', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'3335', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:7.0, disc:0},
+  {code:'3386', name:'Vaseline', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:60.0, disc:0},
+  {code:'3321', name:'Chocolate', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:1.0, disc:0},
+  {code:'3380', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:43.0, disc:0},
+  {code:'3426', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:69.0, disc:0},
+  {code:'3427', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:2.0, disc:0},
+  {code:'3431', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:20.0, disc:0},
+  {code:'3445', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:20.0, disc:0},
+  {code:'3500', name:'Sunfeast', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:15.0, disc:0},
+  {code:'3511', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:35.0, disc:0},
+  {code:'3512', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:38.0, disc:0},
+  {code:'3519', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:40.0, disc:0},
+  {code:'3566', name:'Harpic', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:140.0, disc:0},
+  {code:'3413', name:'Pen', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:15.0, disc:0},
+  {code:'3484', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'3583', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:90.0, disc:0},
+  {code:'3454', name:'Parle', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:8.9, disc:0},
+  {code:'3532', name:'Patanjali', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:45.0, disc:0},
+  {code:'3549', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:103.0, disc:0},
+  {code:'4642', name:'Toothbrush', nameMr:'', cat:'Provision', subCat:'ToothCare', size:'', mrp:70.0, disc:0},
+  {code:'4664', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'4681', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:182.0, disc:0},
+  {code:'3654', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:2.0, disc:0},
+  {code:'3668', name:'Biscuit Parle', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:35.0, disc:0},
+  {code:'3694', name:'Ice Cream', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:10.0, disc:0},
+  {code:'3713', name:'Cotton', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:325.0, disc:0},
+  {code:'3720', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:22.0, disc:0},
+  {code:'3721', name:'Ice Cream Cup', nameMr:'', cat:'Provision', subCat:'Snacks', size:'', mrp:40.0, disc:0},
+  {code:'3765', name:'Cup', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:20.0, disc:0},
+  {code:'9299', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:80.0, disc:0},
+  {code:'4676', name:'Himalaya', nameMr:'', cat:'Provision', subCat:'Cosmetics', size:'', mrp:30.0, disc:0},
+  {code:'4745', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:15.0, disc:0},
+  {code:'3813', name:'Milk', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:210.0, disc:0},
+  {code:'3814', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:32.0, disc:0},
+  {code:'3816', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:67.0, disc:0},
+  {code:'3818', name:'Britannia', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'3822', name:'Patanjali Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:40.0, disc:0},
+  {code:'3823', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:130.0, disc:0},
+  {code:'3828', name:'Powder Surf', nameMr:'', cat:'Provision', subCat:'Detergent', size:'', mrp:165.0, disc:0},
+  {code:'3833', name:'Cotton', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:198.0, disc:0},
+  {code:'3842', name:'Shampoo', nameMr:'', cat:'Provision', subCat:'HairCare', size:'', mrp:49.0, disc:0},
+  {code:'3846', name:'Soap', nameMr:'', cat:'Provision', subCat:'Soap', size:'', mrp:10.0, disc:0},
+  {code:'3873', name:'Notebook', nameMr:'', cat:'Provision', subCat:'Stationery', size:'', mrp:152.0, disc:0},
+  {code:'3855', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:10.0, disc:0},
+  {code:'3887', name:'Powder Sargam', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:20.0, disc:0},
+  {code:'3891', name:'Powder', nameMr:'', cat:'Provision', subCat:'Household', size:'', mrp:84.0, disc:0},
+];
+
+let cart = {}; // code -> qty
+let activeCat = "all";
+let activeSub = "all";
+let minDiscount = 0;
+let sortByDiscount = false;
+let searchTerm = "";
+
+function finalPrice(p){ return Math.round(p.mrp * (1 - p.disc/100)); }
+
+// ---- Icon badges ----
+// Reliable colored-circle icons instead of photos: nothing to load, nothing
+// to break, and each icon + bilingual name makes the product instantly
+// identifiable at a glance.
+const BADGE = {
+  Nightwear:{emoji:"👗", bg:"#F4D9DE"},
+  Innerwear:{emoji:"🎽", bg:"#D9E4F5"},
+  Socks:{emoji:"🧦", bg:"#DCEEE2"},
+  Bedding:{emoji:"🛏️", bg:"#E7DEF2"},
+  Sarees:{emoji:"🥻", bg:"#F7E3C4"},
+  Grains:{emoji:"🍚", bg:"#F8E7D8"},
+  Pulses:{emoji:"🫘", bg:"#F0DCE0"},
+  Flours:{emoji:"🌾", bg:"#EFE8D2"},
+  Oils:{emoji:"🧴", bg:"#DDEAF7"},
+  Spices:{emoji:"🌶️", bg:"#F8DAD2"},
+  Household:{emoji:"🧂", bg:"#E4E9EF"},
+  Beverages:{emoji:"🍵", bg:"#DDEEDD"},
+  Soap:{emoji:"🧼", bg:"#DDEAF7"},
+  ToothCare:{emoji:"🪥", bg:"#DCEEE2"},
+  HairCare:{emoji:"🧴", bg:"#F4D9DE"},
+  Snacks:{emoji:"🍪", bg:"#F8E7D8"},
+  Stationery:{emoji:"✏️", bg:"#EFE8D2"},
+  Detergent:{emoji:"🧺", bg:"#E7DEF2"},
+  Cosmetics:{emoji:"💄", bg:"#F7E3C4"},
+};
+function badgeFor(p){
+  if(BADGE[p.subCat]) return BADGE[p.subCat];
+  if(p.cat==="Cloth") return {emoji:"👕", bg:"#EEE7D8"};
+  if(p.cat==="Provision") return {emoji:"🧴", bg:"#EAE3F3"};
+  return {emoji:"🛒", bg:"#EEE7D8"};
+}
+const SUBCATS = {
+  Cloth: ["Nightwear","Innerwear","Sarees","Bedding","Socks"],
+  Grocery: ["Grains","Pulses","Flours","Oils","Spices","Household","Beverages"],
+  Provision: ["Soap","ToothCare","HairCare","Snacks","Stationery","Detergent","Cosmetics","Household"],
+};
+function renderGrid(){
+  const grid = document.getElementById('productGrid');
+  const term = searchTerm.trim().toLowerCase();
+  let list = products.filter(p=>{
+    const matchCat = activeCat==="all" || p.cat===activeCat;
+    const matchSub = activeSub==="all" || p.subCat===activeSub;
+    const matchDisc = p.disc >= minDiscount;
+    const matchTerm = !term || p.name.toLowerCase().includes(term) || p.code.toLowerCase().includes(term)
+      || (p.nameMr && p.nameMr.includes(term));
+    return matchCat && matchSub && matchDisc && matchTerm;
+  });
+  if(sortByDiscount){
+    list = [...list].sort((a,b)=>b.disc - a.disc);
+  }
+  document.getElementById('emptyMsg').style.display = list.length ? "none":"block";
+  grid.innerHTML = list.map(p=>{
+    const fp = finalPrice(p);
+    const inCart = cart[p.code] || 0;
+    const badge = badgeFor(p);
+    const hot = p.disc >= 20;
+    const unpriced = !p.mrp || p.mrp <= 0;
+    const photoInner = p.img
+      ? `<img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=&quot;badge-emoji&quot;>${badge.emoji}</span>';this.parentElement.style.background='${badge.bg}';">`
+      : `<span class="badge-emoji">${badge.emoji}</span>`;
+    return `<div class="card">
+      <div class="photo" style="${p.img?'':'background:'+badge.bg}">
+        ${photoInner}
+        ${(!unpriced && p.disc>0)?`<span class="ribbon ${hot?'hot':''}">${p.disc}%<br>OFF</span>`:""}
+      </div>
+      <div class="body">
+        <div class="code">Code ${p.code}</div>
+        <div class="name">${p.name}</div>
+        <div class="name-mr">${p.nameMr||""}</div>
+        <div class="size">${p.size}</div>
+        <div class="price-add-row">
+          <div class="prices">
+            ${unpriced ? `<span class="rate-pending">Rate not set</span>` : `
+              <span class="final">₹${fp}</span>
+              ${p.disc>0?`<span class="mrp">₹${p.mrp}</span>`:""}
+            `}
+          </div>
+          ${unpriced
+            ? `<button class="add-btn" disabled>Rate pending</button>`
+            : (inCart
+              ? `<div class="stepper"><button type="button" data-action="dec" data-code="${p.code}">−</button><span>${inCart}</span><button type="button" data-action="inc" data-code="${p.code}">+</button></div>`
+              : `<button type="button" class="add-btn" data-action="add" data-code="${p.code}">ADD</button>`)
+          }
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById('avgSavings').textContent = (()=>{
+    const discounted = products.filter(p=>p.mrp>0 && p.disc>0);
+    if(!discounted.length) return "—";
+    return Math.round(discounted.reduce((s,p)=>s+p.disc,0)/discounted.length)+"%";
+  })();
+}
+
+function addToCart(code){
+  cart[code] = (cart[code]||0) + 1;
+  renderGrid();
+  refreshCartUI();
+  showToast("Added to cart");
+}
+function changeQty(code, delta){
+  cart[code] = (cart[code]||0) + delta;
+  if(cart[code]<=0) delete cart[code];
+  renderGrid();
+  refreshCartUI();
+}
+function cartTotal(){
+  return Object.entries(cart).reduce((sum,[code,qty])=>{
+    const p = products.find(x=>x.code===code);
+    return sum + (p? finalPrice(p)*qty : 0);
+  },0);
+}
+function cartMrpTotal(){
+  return Object.entries(cart).reduce((sum,[code,qty])=>{
+    const p = products.find(x=>x.code===code);
+    return sum + (p? p.mrp*qty : 0);
+  },0);
+}
+function cartCount(){ return Object.values(cart).reduce((a,b)=>a+b,0); }
+
+let orders = []; // session order history, shown under "My Orders"
+
+// Keeps the sticky "View Cart" bar and (if open) the full cart page in sync
+// after every add/remove — this is the single source of truth for cart UI.
+function refreshCartUI(){
+  const c = cartCount();
+  const total = cartTotal();
+  const bar = document.getElementById('viewCartBar');
+  if(c > 0){
+    bar.classList.add('show');
+    document.getElementById('vcCount').textContent = c + (c===1?" item":" items");
+    document.getElementById('vcTotal').textContent = total;
+  } else {
+    bar.classList.remove('show');
+    closeCartPage();
+  }
+  if(document.getElementById('cartPage').classList.contains('show')){
+    renderCartPage();
+  }
+}
+
+function renderCartPage(){
+  const itemsEl = document.getElementById('cartPageItems');
+  const entries = Object.entries(cart);
+  const total = cartTotal();
+  const mrpTotal = cartMrpTotal();
+  const saved = mrpTotal - total;
+  const deliveryOK = total >= DELIVERY_THRESHOLD;
+
+  document.getElementById('cartPageCount').textContent = cartCount();
+  document.getElementById('deliveryTitle').textContent = deliveryOK ? "Home delivery available" : "Pickup at the store";
+  document.getElementById('deliverySub').innerHTML = deliveryOK
+    ? `Shipment of ${cartCount()} items — or pick up in-store`
+    : `Add ₹${Math.max(0,DELIVERY_THRESHOLD-total)} more for home delivery, or pick up in-store`;
+
+  if(!entries.length){
+    itemsEl.innerHTML = `<div class="cart-empty">Your cart is empty.<br>Add a few items from the store.</div>`;
+  } else {
+    itemsEl.innerHTML = entries.map(([code,qty])=>{
+      const p = products.find(x=>x.code===code);
+      if(!p) return "";
+      const badge = badgeFor(p);
+      const thumb = p.img
+        ? `<img src="${p.img}" alt="${p.name}" onerror="this.style.display='none';this.parentElement.style.background='${badge.bg}';this.parentElement.innerHTML='${badge.emoji}';">`
+        : badge.emoji;
+      return `<div class="cp-line">
+        <div class="cp-thumb" style="background:${p.img?'#F1EBDB':badge.bg}">${thumb}</div>
+        <div class="cp-info">
+          <div class="n">${p.name}</div>
+          <div class="sz">${p.size||p.nameMr||""}</div>
+          <div class="p">₹${finalPrice(p)*qty}${p.disc>0?`<span class="strike">₹${p.mrp*qty}</span>`:""}</div>
+        </div>
+        <div class="qty stepper">
+          <button type="button" data-action="dec" data-code="${code}">−</button>
+          <span>${qty}</span>
+          <button type="button" data-action="inc" data-code="${code}">+</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  const savedBadge = document.getElementById('savedBadge');
+  if(saved > 0){
+    savedBadge.style.display = "inline-block";
+    savedBadge.textContent = `Saved ₹${saved}`;
+  } else {
+    savedBadge.style.display = "none";
+  }
+  document.getElementById('billItemsTotal').textContent = "₹" + total;
+  document.getElementById('billDeliveryCharge').textContent = deliveryOK ? "FREE" : "Pickup only";
+  document.getElementById('billGrandTotal').textContent = total;
+  document.getElementById('cartPageFooterTotal').textContent = total;
+}
+
+function openCartPage(){
+  if(!cartCount()){ showToast("Cart is empty"); return; }
+  renderCartPage();
+  document.getElementById('cartPageOverlay').classList.add('show');
+  document.getElementById('cartPage').classList.add('show');
+}
+function closeCartPage(){
+  document.getElementById('cartPageOverlay').classList.remove('show');
+  document.getElementById('cartPage').classList.remove('show');
+}
+
+function openConfirmModal(){
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  if(!name || !phone){ showToast("Please enter name and mobile number"); return; }
+  if(!cartCount()){ showToast("Cart is empty"); return; }
+
+  const total = cartTotal();
+  const deliveryOK = total >= DELIVERY_THRESHOLD;
+  document.getElementById('confirmSub').textContent = deliveryOK
+    ? "Your order qualifies for home delivery, or you can pick it up at the store."
+    : "Your order will be placed for pickup at the store.";
+  document.getElementById('pickupTime').value = "";
+  document.getElementById('specialInstructions').value = "";
+  document.getElementById('confirmOverlay').classList.add('show');
+  document.getElementById('confirmModal').classList.add('show');
+}
+function closeConfirmModal(){
+  document.getElementById('confirmOverlay').classList.remove('show');
+  document.getElementById('confirmModal').classList.remove('show');
+}
+
+function finalPlaceOrder(){
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const pickupTime = document.getElementById('pickupTime').value;
+  const instructions = document.getElementById('specialInstructions').value.trim();
+  const total = cartTotal();
+  const deliveryOK = total >= DELIVERY_THRESHOLD;
+
+  const order = {
+    orderId: "SUK"+Date.now().toString().slice(-6),
+    name, phone, pickupTime, instructions,
+    items: Object.entries(cart).map(([code,qty])=>{
+      const p = products.find(x=>x.code===code);
+      return {code, name:p.name, size:p.size, qty, price:finalPrice(p)};
+    }),
+    total,
+    delivery: deliveryOK,
+    status: "Packing",
+    placedAt: new Date()
+  };
+
+  // In production this posts to the Google Apps Script Web App (ORDER_WEBHOOK_URL),
+  // which appends a row to the store's order-tracking Sheet.
+  if(ORDER_WEBHOOK_URL){
+    fetch(ORDER_WEBHOOK_URL, {method:"POST", mode:"no-cors", body: JSON.stringify(order)}).catch(()=>{});
+  } else {
+    console.log("Order (would be sent to Google Sheet):", order);
+  }
+
+  orders.unshift(order);
+  window.dailyOrders = (window.dailyOrders||0) + 1;
+  document.getElementById('orderCountBrand').textContent = window.dailyOrders + " orders placed today";
+
+  cart = {};
+  renderGrid();
+  closeConfirmModal();
+  closeCartPage();
+  refreshCartUI();
+  renderOrders();
+  showToast(`Order placed — ${order.orderId}`);
+}
+
+function renderOrders(){
+  const list = document.getElementById('ordersList');
+  if(!orders.length){
+    list.innerHTML = `<div class="cart-empty">No orders yet — anything you place will show up here.</div>`;
+    return;
+  }
+  list.innerHTML = orders.map(o=>`
+    <div class="order-card">
+      <div class="row1">
+        <span class="oid">${o.orderId}</span>
+        <span class="status">${o.status}</span>
+      </div>
+      <div class="meta">
+        ${o.delivery ? "🚚 Home delivery" : "🏬 Pickup"}${o.pickupTime ? " · " + o.pickupTime : ""} · ₹${o.total} · ${o.items.reduce((s,i)=>s+i.qty,0)} items
+        ${o.instructions ? "<br>Note: " + o.instructions : ""}
+      </div>
+      <div class="items-list">${o.items.map(i=>`${i.name} ×${i.qty}`).join(", ")}</div>
+    </div>
+  `).join("");
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+// One delegated listener for every Add/+/- button, in the grid and the cart
+// page alike. Attached once to document, so it keeps working no matter how
+// many times the surrounding HTML gets rebuilt by innerHTML re-renders.
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('[data-action]');
+  if(!btn) return;
+  const action = btn.dataset.action;
+  const code = btn.dataset.code;
+  if(action === 'add') addToCart(code);
+  else if(action === 'inc') changeQty(code, 1);
+  else if(action === 'dec') changeQty(code, -1);
+});
+
+document.getElementById('vcBtn').onclick = openCartPage;
+document.getElementById('viewCartBar').onclick = openCartPage;
+document.getElementById('cartPageBack').onclick = closeCartPage;
+document.getElementById('cartPageOverlay').onclick = closeCartPage;
+document.getElementById('cartPagePlaceBtn').onclick = openConfirmModal;
+document.getElementById('cancelConfirm').onclick = closeConfirmModal;
+document.getElementById('confirmOverlay').onclick = closeConfirmModal;
+document.getElementById('finalPlaceOrder').onclick = finalPlaceOrder;
+
+
+document.querySelectorAll('.shop-tab').forEach(tab=>{
+  tab.onclick = ()=>{
+    document.querySelectorAll('.shop-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const isOrders = tab.dataset.tab === "orders";
+    document.getElementById('storeView').style.display = isOrders ? "none" : "block";
+    document.getElementById('ordersView').style.display = isOrders ? "block" : "none";
+    if(isOrders) renderOrders();
+  };
+});
+
+document.querySelectorAll('.cat-pill').forEach(el=>{
+  el.onclick = ()=>{
+    document.querySelectorAll('.cat-pill').forEach(x=>x.classList.remove('active'));
+    el.classList.add('active');
+    activeCat = el.dataset.cat;
+    activeSub = "all";
+    renderSubStrip();
+    renderGrid();
+  };
+});
+document.getElementById('searchBox').oninput = (e)=>{ searchTerm = e.target.value; renderGrid(); };
+
+document.querySelectorAll('.disc-pill').forEach(el=>{
+  el.onclick = ()=>{
+    document.querySelectorAll('.disc-pill').forEach(x=>x.classList.remove('active'));
+    el.classList.add('active');
+    minDiscount = Number(el.dataset.min);
+    renderGrid();
+  };
+});
+document.getElementById('sortPill').onclick = function(){
+  sortByDiscount = !sortByDiscount;
+  this.classList.toggle('active', sortByDiscount);
+  renderGrid();
+};
+
+// ---- Rates from Excel (no sign-in — anyone with the file can update) ----
+// Matches uploaded rows to existing items by Code; unmatched codes are added
+// as new items. Expected columns: Code, Name, Marathi Name, Category,
+// SubCategory, Size, MRP, Discount, Image URL (optional -- a direct photo link)
+function handleExcelUpload(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const wb = XLSX.read(e.target.result, {type:"array"});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, {defval:""});
+      let updated = 0, added = 0;
+      rows.forEach(row=>{
+        const code = String(row.Code || row.code || "").trim();
+        if(!code) return;
+        const rowData = {
+          code,
+          name: String(row.Name || row.name || "").trim(),
+          nameMr: String(row["Marathi Name"] || row.nameMr || "").trim(),
+          cat: String(row.Category || row.cat || "Grocery").trim(),
+          subCat: String(row.SubCategory || row.subCat || "").trim(),
+          size: String(row.Size || row.size || "").trim(),
+          mrp: Number(row.MRP || row.mrp) || 0,
+          disc: Number(row.Discount || row.disc) || 0,
+        };
+        // Only set img when the sheet actually has one, so a blank cell on a
+        // later edit doesn't wipe out a photo that was already uploaded.
+        const imgVal = String(row["Image URL"] || row.Image || row.img || "").trim();
+        if(imgVal) rowData.img = imgVal;
+        const existing = products.find(p=>p.code===code);
+        if(existing){
+          Object.assign(existing, rowData);
+          updated++;
+        } else {
+          products.push(rowData);
+          added++;
+        }
+      });
+      renderSubStrip();
+      renderGrid();
+      showToast(`Rates updated — ${updated} item(s) updated, ${added} new`);
+    }catch(err){
+      showToast("Couldn't read that file — check it's a valid Excel/CSV export");
+    }
+    input.value = "";
+  };
+  reader.readAsArrayBuffer(file);
+}
+function downloadTemplate(){
+  const rows = products.map(p=>({
+    Code:p.code, Name:p.name, "Marathi Name":p.nameMr||"", Category:p.cat,
+    SubCategory:p.subCat||"", Size:p.size, MRP:p.mrp, Discount:p.disc, "Image URL":p.img||""
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Rates");
+  XLSX.writeFile(wb, "suk-bazaar-rates.xlsx");
+}
+
+function renderSubStrip(){
+  const strip = document.getElementById('subStrip');
+  const subs = activeCat==="all"
+    ? [...SUBCATS.Cloth, ...SUBCATS.Grocery, ...SUBCATS.Provision]
+    : (SUBCATS[activeCat] || []);
+  if(!subs.length){ strip.innerHTML = ""; return; }
+  const allTile = `<button type="button" class="subcat-tile ${activeSub==='all'?'active':''}" data-sub="all">
+    <span class="icon" style="background:#EFE8D2">🗂️</span>
+    <span class="lbl">All</span>
+  </button>`;
+  const tiles = subs.map(s=>{
+    const b = BADGE[s] || {emoji:"🛒", bg:"#EEE7D8"};
+    return `<button type="button" class="subcat-tile ${activeSub===s?'active':''}" data-sub="${s}">
+      <span class="icon" style="background:${b.bg}">${b.emoji}</span>
+      <span class="lbl">${s}</span>
+    </button>`;
+  }).join("");
+  strip.innerHTML = allTile + tiles;
+}
+function setSub(s){
+  activeSub = s;
+  renderSubStrip();
+  renderGrid();
+}
+document.getElementById('subStrip').addEventListener('click', (e)=>{
+  const tile = e.target.closest('[data-sub]');
+  if(tile) setSub(tile.dataset.sub);
+});
+
+// If a published-Sheet CSV link is configured, pull the latest rates on every
+// page load — this is what makes an edit in the Sheet "just show up" for
+// every customer, with no one needing to manually re-upload a file.
+async function loadRatesFromSheet(){
+  if(!RATES_CSV_URL) return;
+  try{
+    const res = await fetch(RATES_CSV_URL, {cache:"no-store"});
+    const csvText = await res.text();
+    const wb = XLSX.read(csvText, {type:"string"});
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, {defval:""});
+    rows.forEach(row=>{
+      const code = String(row.Code || row.code || "").trim();
+      if(!code) return;
+      const rowData = {
+        code,
+        name: String(row.Name || row.name || "").trim(),
+        nameMr: String(row["Marathi Name"] || row.nameMr || "").trim(),
+        cat: String(row.Category || row.cat || "Grocery").trim(),
+        subCat: String(row.SubCategory || row.subCat || "").trim(),
+        size: String(row.Size || row.size || "").trim(),
+        mrp: Number(row.MRP || row.mrp) || 0,
+        disc: Number(row.Discount || row.disc) || 0,
+      };
+      const imgVal = String(row["Image URL"] || row.Image || row.img || "").trim();
+      if(imgVal) rowData.img = imgVal;
+      const existing = products.find(p=>p.code===code);
+      if(existing) Object.assign(existing, rowData);
+      else products.push(rowData);
+    });
+    renderSubStrip();
+    renderGrid();
+  }catch(err){
+    console.log("Could not load rates from Sheet:", err);
+  }
+}
+
+renderSubStrip();
+renderGrid();
+refreshCartUI();
+loadRatesFromSheet();
+</script>
+</body>
+</html>
+
+
     --paper-raised:#FFFFFF;
     --line:#E5DDC8;
     --red:#C1442A;
