@@ -22,6 +22,15 @@
     --shadow: 0 2px 10px rgba(27,42,74,0.08);
   }
   *{box-sizing:border-box;}
+  /* Mobile browsers can mistake a tap on a custom (non-<button>) control, or
+     even a real <button>, for a long-press text-selection if the OS is slow
+     to register it as a click. That shows up as the native Copy/Share
+     selection popup instead of the tap actually firing — which is what was
+     breaking Add/+/-/Place Order on touch devices. This turns that off. */
+  button, .cat-pill, .disc-pill, .sort-pill, .shop-tab, .viewcart-bar, .subcat-tile,
+  .add-btn, .stepper, .cf-place-btn, .cartpage-header .back-btn, .btn-cancel, .btn-place{
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation;
+  }
   body{
     margin:0;
     background:var(--paper);
@@ -316,8 +325,8 @@
 </header>
 
 <nav class="shop-nav">
-  <button class="shop-tab active" data-tab="shop">🛍️ Shop</button>
-  <button class="shop-tab" data-tab="orders">📦 My Orders</button>
+  <button type="button" class="shop-tab active" data-tab="shop">🛍️ Shop</button>
+  <button type="button" class="shop-tab" data-tab="orders">📦 My Orders</button>
 </nav>
 
 <div class="layout">
@@ -377,13 +386,13 @@
       <div class="vc-total">₹<span id="vcTotal">0</span></div>
     </div>
   </div>
-  <button class="vc-btn" id="vcBtn">View Cart ›</button>
+  <button type="button" class="vc-btn" id="vcBtn">View Cart ›</button>
 </div>
 
 <div class="cartpage-overlay" id="cartPageOverlay"></div>
 <div class="cartpage" id="cartPage">
   <div class="cartpage-header">
-    <button class="back-btn" id="cartPageBack">←</button>
+    <button type="button" class="back-btn" id="cartPageBack">←</button>
     <h2>My Cart</h2>
     <span style="width:20px"></span>
   </div>
@@ -411,7 +420,7 @@
       <div class="cf-amt">₹<span id="cartPageFooterTotal">0</span></div>
       <div class="cf-lbl">TOTAL</div>
     </div>
-    <button class="cf-place-btn" id="cartPagePlaceBtn">Place Order ›</button>
+    <button type="button" class="cf-place-btn" id="cartPagePlaceBtn">Place Order ›</button>
   </div>
 </div>
 
@@ -428,8 +437,8 @@
     <input type="text" id="specialInstructions" placeholder="e.g. Pack rice separately">
   </div>
   <div class="confirm-btns">
-    <button class="btn-cancel" id="cancelConfirm">Cancel</button>
-    <button class="btn-place" id="finalPlaceOrder">🛒 Place Order</button>
+    <button type="button" class="btn-cancel" id="cancelConfirm">Cancel</button>
+    <button type="button" class="btn-place" id="finalPlaceOrder">🛒 Place Order</button>
   </div>
 </div>
 
@@ -1341,7 +1350,7 @@ function renderGrid(){
             `}
           </div>
           ${unpriced
-            ? `<button class="add-btn" disabled>Rate pending</button>`
+            ? `<button type="button" class="add-btn" disabled>Rate pending</button>`
             : (inCart
               ? `<div class="stepper"><button type="button" data-action="dec" data-code="${p.code}">−</button><span>${inCart}</span><button type="button" data-action="inc" data-code="${p.code}">+</button></div>`
               : `<button type="button" class="add-btn" data-action="add" data-code="${p.code}">ADD</button>`)
