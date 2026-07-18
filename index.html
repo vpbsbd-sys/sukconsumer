@@ -242,11 +242,11 @@
 
   /* Confirm Order modal */
 
-  .modal-overlay{ position:fixed; inset:0; background:rgba(27,42,74,.4); z-index:60; display:none; }
+  .modal-overlay{ position:fixed; inset:0; background:rgba(27,42,74,.4); z-index:80; display:none; }
   .modal-overlay.show{ display:block; }
   .confirm-modal{
     position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:420px; max-width:90vw;
-    background:var(--paper-raised); border-radius:14px; padding:26px 26px 22px; z-index:61; display:none;
+    background:var(--paper-raised); border-radius:14px; padding:26px 26px 22px; z-index:81; display:none;
     box-shadow:0 12px 40px rgba(0,0,0,.25);
   }
   .confirm-modal.show{ display:block; }
@@ -257,6 +257,20 @@
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
   .confirm-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 18px; }
+  .pay-options{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+  .pay-opt{
+    display:flex; align-items:center; gap:12px; text-align:left; width:100%;
+    border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:12px 14px; cursor:pointer;
+  }
+  .pay-opt .pay-icon{ font-size:22px; }
+  .pay-opt .pay-title{ font-weight:700; font-size:13.5px; color:var(--ink); }
+  .pay-opt .pay-sub{ font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
+  .pay-opt .pay-check{
+    margin-left:auto; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent; flex-shrink:0;
+  }
+  .pay-opt.selected{ border-color:var(--green); background:#F1F8F3; }
+  .pay-opt.selected .pay-check{ border-color:var(--green); background:var(--green); color:#fff; }
   .confirm-btns{ display:flex; gap:10px; margin-top:16px; }
   .confirm-btns button{ flex:1; padding:12px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; }
   .btn-cancel{ background:var(--paper-raised); border:1.5px solid var(--line); color:var(--ink-soft); }
@@ -428,13 +442,23 @@
 <div class="confirm-modal" id="confirmModal">
   <div class="confirm-head"><span class="tick-sm">✓</span><h3>Confirm Order</h3></div>
   <p class="confirm-sub" id="confirmSub">Your order will be placed for pickup at the selected store.</p>
-  <div class="form-field" id="pickupTimeField">
-    <label>PICKUP TIME</label>
-    <input type="time" id="pickupTime">
-  </div>
-  <div class="form-field">
-    <label>SPECIAL INSTRUCTIONS (OPTIONAL)</label>
-    <input type="text" id="specialInstructions" placeholder="e.g. Pack rice separately">
+  <div class="pay-options" id="payOptions">
+    <button type="button" class="pay-opt" data-pay="cod">
+      <span class="pay-icon">💵</span>
+      <div>
+        <div class="pay-title">Cash on Delivery / Pickup</div>
+        <div class="pay-sub">Pay when you collect or receive your order</div>
+      </div>
+      <span class="pay-check">✓</span>
+    </button>
+    <button type="button" class="pay-opt" data-pay="online">
+      <span class="pay-icon">💳</span>
+      <div>
+        <div class="pay-title">Pay Online</div>
+        <div class="pay-sub">UPI / Card / Netbanking</div>
+      </div>
+      <span class="pay-check">✓</span>
+    </button>
   </div>
   <div class="confirm-btns">
     <button type="button" class="btn-cancel" id="cancelConfirm">Cancel</button>
@@ -1492,8 +1516,10 @@ function openConfirmModal(){
   document.getElementById('confirmSub').textContent = deliveryOK
     ? "Your order qualifies for home delivery, or you can pick it up at the store."
     : "Your order will be placed for pickup at the store.";
-  document.getElementById('pickupTime').value = "";
-  document.getElementById('specialInstructions').value = "";
+  selectedPayment = "cod";
+  document.querySelectorAll('.pay-opt').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.pay === selectedPayment);
+  });
   document.getElementById('confirmOverlay').classList.add('show');
   document.getElementById('confirmModal').classList.add('show');
 }
@@ -1502,17 +1528,26 @@ function closeConfirmModal(){
   document.getElementById('confirmModal').classList.remove('show');
 }
 
+let selectedPayment = "cod";
+document.getElementById('payOptions').addEventListener('click', (e)=>{
+  const opt = e.target.closest('.pay-opt');
+  if(!opt) return;
+  selectedPayment = opt.dataset.pay;
+  document.querySelectorAll('.pay-opt').forEach(el=>{
+    el.classList.toggle('selected', el === opt);
+  });
+});
+
 function finalPlaceOrder(){
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
-  const pickupTime = document.getElementById('pickupTime').value;
-  const instructions = document.getElementById('specialInstructions').value.trim();
+  const paymentMethod = selectedPayment;
   const total = cartTotal();
   const deliveryOK = total >= DELIVERY_THRESHOLD;
 
   const order = {
     orderId: "SUK"+Date.now().toString().slice(-6),
-    name, phone, pickupTime, instructions,
+    name, phone, paymentMethod,
     items: Object.entries(cart).map(([code,qty])=>{
       const p = products.find(x=>x.code===code);
       return {code, name:p.name, size:p.size, qty, price:finalPrice(p)};
@@ -1557,8 +1592,7 @@ function renderOrders(){
         <span class="status">${o.status}</span>
       </div>
       <div class="meta">
-        ${o.delivery ? "🚚 Home delivery" : "🏬 Pickup"}${o.pickupTime ? " · " + o.pickupTime : ""} · ₹${o.total} · ${o.items.reduce((s,i)=>s+i.qty,0)} items
-        ${o.instructions ? "<br>Note: " + o.instructions : ""}
+        ${o.delivery ? "🚚 Home delivery" : "🏬 Pickup"} · ${o.paymentMethod === "online" ? "💳 Paid online" : "💵 Cash on delivery/pickup"} · ₹${o.total} · ${o.items.reduce((s,i)=>s+i.qty,0)} items
       </div>
       <div class="items-list">${o.items.map(i=>`${i.name} ×${i.qty}`).join(", ")}</div>
     </div>
