@@ -242,11 +242,11 @@
 
   /* Confirm Order modal */
 
-  .modal-overlay{ position:fixed; inset:0; background:rgba(27,42,74,.4); z-index:80; display:none; }
+  .modal-overlay{ position:fixed; inset:0; background:rgba(27,42,74,.4); z-index:60; display:none; }
   .modal-overlay.show{ display:block; }
   .confirm-modal{
     position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:420px; max-width:90vw;
-    background:var(--paper-raised); border-radius:14px; padding:26px 26px 22px; z-index:81; display:none;
+    background:var(--paper-raised); border-radius:14px; padding:26px 26px 22px; z-index:61; display:none;
     box-shadow:0 12px 40px rgba(0,0,0,.25);
   }
   .confirm-modal.show{ display:block; }
@@ -257,20 +257,6 @@
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
   .confirm-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 18px; }
-  .pay-options{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
-  .pay-opt{
-    display:flex; align-items:center; gap:12px; text-align:left; width:100%;
-    border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:12px 14px; cursor:pointer;
-  }
-  .pay-opt .pay-icon{ font-size:22px; }
-  .pay-opt .pay-title{ font-weight:700; font-size:13.5px; color:var(--ink); }
-  .pay-opt .pay-sub{ font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
-  .pay-opt .pay-check{
-    margin-left:auto; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--line);
-    display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent; flex-shrink:0;
-  }
-  .pay-opt.selected{ border-color:var(--green); background:#F1F8F3; }
-  .pay-opt.selected .pay-check{ border-color:var(--green); background:var(--green); color:#fff; }
   .confirm-btns{ display:flex; gap:10px; margin-top:16px; }
   .confirm-btns button{ flex:1; padding:12px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; }
   .btn-cancel{ background:var(--paper-raised); border:1.5px solid var(--line); color:var(--ink-soft); }
@@ -325,7 +311,7 @@
 
 <div class="brandbar">
   <span>Shivaji University Central Co-operative Consumer Stores Ltd., Kolhapur</span>
-  <span id="orderCountBrand">0 orders placed today</span>
+  <span><span id="orderCountBrand">0 orders placed today</span> · build 2026-10-03-photos</span>
 </div>
 
 <header class="top">
@@ -442,23 +428,13 @@
 <div class="confirm-modal" id="confirmModal">
   <div class="confirm-head"><span class="tick-sm">✓</span><h3>Confirm Order</h3></div>
   <p class="confirm-sub" id="confirmSub">Your order will be placed for pickup at the selected store.</p>
-  <div class="pay-options" id="payOptions">
-    <button type="button" class="pay-opt" data-pay="cod">
-      <span class="pay-icon">💵</span>
-      <div>
-        <div class="pay-title">Cash on Delivery / Pickup</div>
-        <div class="pay-sub">Pay when you collect or receive your order</div>
-      </div>
-      <span class="pay-check">✓</span>
-    </button>
-    <button type="button" class="pay-opt" data-pay="online">
-      <span class="pay-icon">💳</span>
-      <div>
-        <div class="pay-title">Pay Online</div>
-        <div class="pay-sub">UPI / Card / Netbanking</div>
-      </div>
-      <span class="pay-check">✓</span>
-    </button>
+  <div class="form-field" id="pickupTimeField">
+    <label>PICKUP TIME</label>
+    <input type="time" id="pickupTime">
+  </div>
+  <div class="form-field">
+    <label>SPECIAL INSTRUCTIONS (OPTIONAL)</label>
+    <input type="text" id="specialInstructions" placeholder="e.g. Pack rice separately">
   </div>
   <div class="confirm-btns">
     <button type="button" class="btn-cancel" id="cancelConfirm">Cancel</button>
@@ -1327,6 +1303,58 @@ function badgeFor(p){
   if(p.cat==="Provision") return {emoji:"🧴", bg:"#EAE3F3"};
   return {emoji:"🛒", bg:"#EEE7D8"};
 }
+// ---- Product photos ----
+// 1) A link in the Sheet's "Image URL" column always wins for that item.
+// 2) Otherwise the item gets the shared photo for its product type, read from
+//    the images/ folder next to this page (e.g. images/soap.jpg).
+// 3) If that file isn't there (yet), the colored icon shows instead.
+const PHOTO_RULES = [
+  [/nighty|nightie|nightgown/, "nighty"],
+  [/gown/, "gown"],
+  [/banian|banyan|vest/, "banian"],
+  [/petticoat/, "petticoat"],
+  [/saree|sari/, "saree"],
+  [/bedsheet|bed sheet/, "bedsheet"],
+  [/towel/, "towel"],
+  [/napkin/, "napkin"],
+  [/sock/, "socks"],
+  [/cloth|fabric|jacket|salwar|kurta|shirt|pant/, "fabric"],
+  [/liquid soap|hand ?wash/, "liquid-soap"],
+  [/soap/, "soap"],
+  [/colgate|close ?up|pepsodent|toothpaste/, "toothpaste"],
+  [/toothbrush|tooth brush/, "toothbrush"],
+  [/shampoo|conditioner|head&shoulders|hair/, "shampoo"],
+  [/biscuit|parle|britannia|sunfeast|tiger|cake|cookie/, "biscuits"],
+  [/chocolate|cadbury/, "chocolate"],
+  [/ice ?cream/, "icecream"],
+  [/wafer|chips|namkeen/, "chips"],
+  [/\btea\b|chai/, "tea"],
+  [/\bvim\b|dish ?wash/, "dishwash"],
+  [/surf|ariel|\bwheel\b|\brin\b|detergent|harpic/, "detergent"],
+  [/notebook|note book/, "notebook"],
+  [/\bpens?\b/, "pen"],
+  [/pencil/, "pencil"],
+  [/vaseline|ponds|himalaya|fair&lovely|fair & lovely|boroplus|lipstick|cream/, "cream"],
+  [/agarbatti|incense|dhoop|camphor/, "agarbatti"],
+  [/milk/, "milk"],
+  [/\bghee\b/, "ghee"],
+  [/broom|jhadu/, "broom"],
+  [/\brice\b/, "rice"],
+  [/\bdal\b|lentil/, "dal"],
+  [/atta|flour|wheat/, "flour"],
+  [/\boil\b/, "oil"],
+  [/turmeric|spice|masala|chilli|chili/, "spices"],
+  [/sugar/, "sugar"],
+  [/salt/, "salt"],
+];
+function photoFor(p){
+  if(p.img) return p.img;
+  const n = (p.name||"").toLowerCase();
+  for(const [re,key] of PHOTO_RULES){
+    if(re.test(n)) return "images/" + key + ".jpg";
+  }
+  return "";
+}
 const SUBCATS = {
   Cloth: ["Nightwear","Innerwear","Sarees","Bedding","Socks"],
   Grocery: ["Grains","Pulses","Flours","Oils","Spices","Household","Beverages"],
@@ -1353,11 +1381,12 @@ function renderGrid(){
     const badge = badgeFor(p);
     const hot = p.disc >= 20;
     const unpriced = !p.mrp || p.mrp <= 0;
-    const photoInner = p.img
-      ? `<img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=&quot;badge-emoji&quot;>${badge.emoji}</span>';this.parentElement.style.background='${badge.bg}';">`
+    const src = photoFor(p);
+    const photoInner = src
+      ? `<img src="${src}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.outerHTML='<span class=&quot;badge-emoji&quot;>${badge.emoji}</span>';">`
       : `<span class="badge-emoji">${badge.emoji}</span>`;
     return `<div class="card">
-      <div class="photo" style="${p.img?'':'background:'+badge.bg}">
+      <div class="photo" style="background:${badge.bg}">
         ${photoInner}
         ${(!unpriced && p.disc>0)?`<span class="ribbon ${hot?'hot':''}">${p.disc}%<br>OFF</span>`:""}
       </div>
@@ -1453,11 +1482,12 @@ function renderCartPage(){
       const p = products.find(x=>x.code===code);
       if(!p) return "";
       const badge = badgeFor(p);
-      const thumb = p.img
-        ? `<img src="${p.img}" alt="${p.name}" onerror="this.style.display='none';this.parentElement.style.background='${badge.bg}';this.parentElement.innerHTML='${badge.emoji}';">`
+      const src = photoFor(p);
+      const thumb = src
+        ? `<img src="${src}" alt="${p.name}" onerror="this.onerror=null;this.outerHTML='${badge.emoji}';">`
         : badge.emoji;
       return `<div class="cp-line">
-        <div class="cp-thumb" style="background:${p.img?'#F1EBDB':badge.bg}">${thumb}</div>
+        <div class="cp-thumb" style="background:${badge.bg}">${thumb}</div>
         <div class="cp-info">
           <div class="n">${p.name}</div>
           <div class="sz">${p.size||p.nameMr||""}</div>
@@ -1516,10 +1546,8 @@ function openConfirmModal(){
   document.getElementById('confirmSub').textContent = deliveryOK
     ? "Your order qualifies for home delivery, or you can pick it up at the store."
     : "Your order will be placed for pickup at the store.";
-  selectedPayment = "cod";
-  document.querySelectorAll('.pay-opt').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.pay === selectedPayment);
-  });
+  document.getElementById('pickupTime').value = "";
+  document.getElementById('specialInstructions').value = "";
   document.getElementById('confirmOverlay').classList.add('show');
   document.getElementById('confirmModal').classList.add('show');
 }
@@ -1528,26 +1556,17 @@ function closeConfirmModal(){
   document.getElementById('confirmModal').classList.remove('show');
 }
 
-let selectedPayment = "cod";
-document.getElementById('payOptions').addEventListener('click', (e)=>{
-  const opt = e.target.closest('.pay-opt');
-  if(!opt) return;
-  selectedPayment = opt.dataset.pay;
-  document.querySelectorAll('.pay-opt').forEach(el=>{
-    el.classList.toggle('selected', el === opt);
-  });
-});
-
 function finalPlaceOrder(){
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
-  const paymentMethod = selectedPayment;
+  const pickupTime = document.getElementById('pickupTime').value;
+  const instructions = document.getElementById('specialInstructions').value.trim();
   const total = cartTotal();
   const deliveryOK = total >= DELIVERY_THRESHOLD;
 
   const order = {
     orderId: "SUK"+Date.now().toString().slice(-6),
-    name, phone, paymentMethod,
+    name, phone, pickupTime, instructions,
     items: Object.entries(cart).map(([code,qty])=>{
       const p = products.find(x=>x.code===code);
       return {code, name:p.name, size:p.size, qty, price:finalPrice(p)};
@@ -1592,7 +1611,8 @@ function renderOrders(){
         <span class="status">${o.status}</span>
       </div>
       <div class="meta">
-        ${o.delivery ? "🚚 Home delivery" : "🏬 Pickup"} · ${o.paymentMethod === "online" ? "💳 Paid online" : "💵 Cash on delivery/pickup"} · ₹${o.total} · ${o.items.reduce((s,i)=>s+i.qty,0)} items
+        ${o.delivery ? "🚚 Home delivery" : "🏬 Pickup"}${o.pickupTime ? " · " + o.pickupTime : ""} · ₹${o.total} · ${o.items.reduce((s,i)=>s+i.qty,0)} items
+        ${o.instructions ? "<br>Note: " + o.instructions : ""}
       </div>
       <div class="items-list">${o.items.map(i=>`${i.name} ×${i.qty}`).join(", ")}</div>
     </div>
@@ -1743,4 +1763,3 @@ loadRatesFromSheet();
 </script>
 </body>
 </html>
-
